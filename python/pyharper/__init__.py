@@ -51,12 +51,11 @@ class _IN: # invariable number (constants)
 	RET_DATA_LEN		= 7
 
 
-class Dev:#class I2cDev
+class Harper:#class I2cDev
 
 	def __init__(self, addr, port = 1):
 		self.__addr = addr
 		self.__i2c = smbus.SMBus(port)
-		#self.__id, self.__max_arg_num, self.__num_info_char = 
 		self.__read_id_info()
 		self.__reset_args()
 		print('Harper device (addr:0x%x, id:%d) ready.'%(addr,self.__id))
@@ -88,18 +87,6 @@ class Dev:#class I2cDev
 		self.__wait_until_cmd_handled()
 		print('Address of the device has changed to 0x%x.'%self.addr)
 		print('The device must be reset to use new address.')
-
-	def __reset_args(self):
-		self.__lst_args = []
-		for k in range(self.__max_arg_num):
-			self.__lst_args.append(None)
-
-	def __read_id_info(self):
-		info = self.__read_i2c_data(cmd=_IN.CMD_READ_ID, length = 7)
-		self.__id = struct.unpack('L', bytes(info[0:4]))[0]
-		self.__max_arg_num = info[4]
-		self.__num_funcs = info[5]
-		#num_info_char = struct.unpack('H', bytes(info[5:7]))[0]
 
 	def _send_int8(self, val, index = 0):
 		lst_data = list(struct.pack('b', val))
@@ -147,6 +134,7 @@ class Dev:#class I2cDev
 		self.__reg_arg(index, _IN.DT_STR, lst_data)
 
 	def _exec_func(self, index):
+		"""execute function in the Harper (arduino) device"""
 		if index >= self.__num_funcs:
 			raise Exception('Index of func out of bound (dev:0x%x)'%self.__addr)
 
@@ -198,9 +186,21 @@ class Dev:#class I2cDev
 						#print('info:%d'%info)
 						raise Exception('Unknown error(%d) occurred.(dev:0x%x)'%(stat, self.__addr))
 
+	# internal functions ==========================================
+	
+	def __reset_args(self):
+		"""reset all the function argument(list) as None"""
+		self.__lst_args = []
+		for k in range(self.__max_arg_num):
+			self.__lst_args.append(None)
 
-	#########################################################################
-	# internal functions
+	def __read_id_info(self):
+		"""read id, max_arg_num and num_funcs from Harper device"""
+		info = self.__read_i2c_data(cmd=_IN.CMD_READ_ID, length = 7)
+		self.__id = struct.unpack('L', bytes(info[0:4]))[0]
+		self.__max_arg_num = info[4]
+		self.__num_funcs = info[5]
+
 	def __send_args(self):
 		for arg_pckt in self.__lst_args:
 			retryCount = 0

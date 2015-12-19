@@ -1,6 +1,6 @@
-from . import Dev
+from . import Harper
 
-class TextLcd(Dev):
+class TextLcd(Harper):
 
 	def __init__(self, addr, port = 1):
 		super().__init__(addr, port = port)

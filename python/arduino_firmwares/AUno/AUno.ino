@@ -31,17 +31,14 @@ void func4() { //analogWrite()
 	analogWrite(pin, val);
 }
 
-
 void setup() {
-///*
 	Harper.add_func(func0);
 	Harper.add_func(func1);
 	Harper.add_func(func2);
 	Harper.add_func(func3);
 	Harper.add_func(func4);
-//*/
 
-	byte addr = Harper.begin(0x10, 300);
+	Harper.begin(0x10, 0);
 }
 
 void loop() {

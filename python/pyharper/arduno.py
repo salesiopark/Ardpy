@@ -1,7 +1,7 @@
 # eziopy.arduino
-from . import Dev
+from . import Harper
 
-class ArdUno(Dev):
+class ArdUno(Harper):
 	INPUT = 0
 	OUTPUT = 1
 	INPUT_PULLUP = 2
@@ -24,7 +24,7 @@ class ArdUno(Dev):
 		self._send_byte(val, index = 1) # 2nd argument
 		return self._exec_func(1) # exec ditigtalWrite() function
 
-	def digitalRead(self, pin, pullup=False):
+	def digitalRead(self, pin):
 		self._send_byte(pin) 				# 1st argument
 		return self._exec_func(2);
 
@@ -37,6 +37,3 @@ class ArdUno(Dev):
 		self._send_byte(pin) # 1st argument
 		self._send_byte(val, index = 1) # 2nd argument
 		return self._exec_func(4) # exec ditigtalWrite() function
-
-	def getULong(self):
-		return self._exec_func(5);
