@@ -5,33 +5,31 @@
 * <Wire.h> must be included before including <Harper.h> in user .ino file
 ************************************************************************/
 
-//#include "Arduino.h"
 #include "Harper.h"
 #include "Wire.h"
 #include <avr/eeprom.h>
 
-
 // static memeber initialization --------------------------------------------
 
-Eziopy::_U_Id				Eziopy::_u_id = {0xffffffff, };
-volatile byte				Eziopy::_cmd = 0 ;
-volatile byte				Eziopy::_cmd_i2c = 0 ;
-volatile byte				Eziopy::_rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
-volatile Eziopy::_U_Ret	Eziopy::_u_ret = {{1,} };
-char							Eziopy::_strBuf[ __STR_BUF_LENGTH__ ] = {0,};
-byte							Eziopy::_checksum = 0;
-byte							Eziopy::_idx = 0;
-volatile byte				Eziopy::_stat = 0;
-//volatile byte 				Eziopy::_stat_write = 1;
-volatile byte 				Eziopy::_statArr[2]={0,};
-volatile Eziopy::_S_Arg*	Eziopy::_args = NULL;
-byte 							Eziopy::_max_arg_num = __INIT_MAX_ARG_NUM__;
-pfunc_t*						Eziopy::_tmpFuncArr = NULL;
-byte							Eziopy::_num_funcs = 0;
-pfunc_t*						Eziopy::_funcArr = NULL;
-volatile byte 				Eziopy::_len_just_rcvd = 0;
+_HRP_::_U_Id				_HRP_::_u_id = {0xffffffff, };
+volatile byte				_HRP_::_cmd = 0 ;
+volatile byte				_HRP_::_cmd_i2c = 0 ;
+volatile byte				_HRP_::_rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
+volatile _HRP_::_U_Ret	_HRP_::_u_ret = {{1,} };
+char							_HRP_::_strBuf[ __STR_BUF_LENGTH__ ] = {0,};
+byte							_HRP_::_checksum = 0;
+byte							_HRP_::_idx = 0;
+volatile byte				_HRP_::_stat = 0;
+//volatile byte 				_HRP_::_stat_write = 1;
+volatile byte 				_HRP_::_statArr[2]={0,};
+volatile _HRP_::_S_Arg*	_HRP_::_args = NULL;
+byte 							_HRP_::_max_arg_num = __INIT_MAX_ARG_NUM__;
+pfunc_t*						_HRP_::_tmpFuncArr = NULL;
+byte							_HRP_::_num_funcs = 0;
+pfunc_t*						_HRP_::_funcArr = NULL;
+volatile byte 				_HRP_::_len_just_rcvd = 0;
 // ---------
-void Eziopy::set_max_arg_num(byte num) {
+void _HRP_::set_max_arg_num(byte num) {
 ///*
 	if (_args == NULL) // before calling begin() 
 		_max_arg_num = num;
@@ -44,49 +42,49 @@ void Eziopy::set_max_arg_num(byte num) {
 
 // set_ret() functions overloading definitions -----------------------------------------
 
-void Eziopy::set_ret(uint8_t byVal) {
+void _HRP_::set_ret(uint8_t byVal) {
 	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_UINT8;
 		_u_ret.s_ret.dat.ucVal = byVal;
 	}
 }	
 
-void Eziopy::set_ret(int8_t sbVal) {
+void _HRP_::set_ret(int8_t sbVal) {
 	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_INT8;
 		_u_ret.s_ret.dat.sbVal = sbVal;
 	}
 }	
 
-void Eziopy::set_ret(int16_t sVal) {
+void _HRP_::set_ret(int16_t sVal) {
 	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_INT16;
 		_u_ret.s_ret.dat.u_s.val = sVal;
 	}
 }	
 
-void Eziopy::set_ret(uint16_t usVal) {
+void _HRP_::set_ret(uint16_t usVal) {
 	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_UINT16;
 		_u_ret.s_ret.dat.u_us.val = usVal;
 	}
 }	
 
-void Eziopy::set_ret(int32_t lVal) {
+void _HRP_::set_ret(int32_t lVal) {
 	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_INT32;
 		_u_ret.s_ret.dat.u_l.val = lVal;
 	}
 }	
 
-void Eziopy::set_ret(uint32_t ulVal) {
+void _HRP_::set_ret(uint32_t ulVal) {
 	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_UINT32;
 		_u_ret.s_ret.dat.u_ul.val = ulVal;
 	}
 }	
 
-void Eziopy::set_ret(float fVal) {
+void _HRP_::set_ret(float fVal) {
 	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_FLOAT;
 		_u_ret.s_ret.dat.u_f.val = fVal;
@@ -95,7 +93,7 @@ void Eziopy::set_ret(float fVal) {
 
 // public methods definition ------------------------------------------------------
 
-byte Eziopy::begin(byte addr, uint32_t dev_id) {
+byte _HRP_::begin(byte addr, uint32_t dev_id) {
 	// store id and some infos
 	_u_id.s_id.val = dev_id;
 	_u_id.s_id.numArgs = _max_arg_num;
@@ -125,7 +123,7 @@ byte Eziopy::begin(byte addr, uint32_t dev_id) {
 }
 
 // user function adding : no num limit
-void Eziopy::add_func( void (*func)(void) ){
+void _HRP_::add_func( void (*func)(void) ){
 	_num_funcs ++;
 	_tmpFuncArr = new pfunc_t[_num_funcs];
 
@@ -146,7 +144,7 @@ void Eziopy::add_func( void (*func)(void) ){
 // 만약 그렇지 않다면 _u_ret.s_ret.info 에 인자의 인덱스를 저장하고
 // stat에 에러 코드를 저장한다.
 
-void Eziopy::_check_if_no_err_to_get_arg(byte index, byte dtype) {
+void _HRP_::_check_if_no_err_to_get_arg(byte index, byte dtype) {
 	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if currently no error occurred
 		if ( _args[index].type == _DTYPE_NONE) { // if there is no arg received
 			_u_ret.s_ret.info = index;
@@ -158,53 +156,53 @@ void Eziopy::_check_if_no_err_to_get_arg(byte index, byte dtype) {
 	}
 }
 
-int8_t Eziopy::get_int8(byte index) {
+int8_t _HRP_::get_int8(byte index) {
 	_check_if_no_err_to_get_arg(index, _DTYPE_INT8);
   return _args[index].dat.sbVal;
 }
 
-uint8_t Eziopy::get_uint8(byte index) {
+uint8_t _HRP_::get_uint8(byte index) {
 	_check_if_no_err_to_get_arg(index, _DTYPE_UINT8);
   return _args[index].dat.ucVal;
 }
 
 
-uint8_t Eziopy::get_byte(byte index) {
+uint8_t _HRP_::get_byte(byte index) {
 	_check_if_no_err_to_get_arg(index, _DTYPE_UINT8);
 	return _args[index].dat.ucVal;
 }
 
-int16_t Eziopy::get_int16(byte index) {
+int16_t _HRP_::get_int16(byte index) {
   	_check_if_no_err_to_get_arg(index, _DTYPE_INT16);
   return _args[index].dat.u_s.val;
 }
 
-int16_t Eziopy::get_int(byte index) {
+int16_t _HRP_::get_int(byte index) {
 	_check_if_no_err_to_get_arg(index, _DTYPE_INT16);
   return _args[index].dat.u_s.val;
 }
 
-uint16_t Eziopy::get_uint16(byte index) {
+uint16_t _HRP_::get_uint16(byte index) {
 	_check_if_no_err_to_get_arg(index, _DTYPE_UINT16);
   return _args[index].dat.u_us.val;
 }
 
-int32_t Eziopy::get_int32(byte index) {
+int32_t _HRP_::get_int32(byte index) {
 	_check_if_no_err_to_get_arg(index, _DTYPE_INT32);
   return _args[index].dat.u_l.val;
 }
 
-uint32_t Eziopy::get_uint32(byte index) {
+uint32_t _HRP_::get_uint32(byte index) {
 	_check_if_no_err_to_get_arg(index, _DTYPE_UINT32);
   return _args[index].dat.u_ul.val;
 }
 
-float Eziopy::get_float(byte index){
+float _HRP_::get_float(byte index){
 	_check_if_no_err_to_get_arg(index, _DTYPE_FLOAT);
   return _args[index].dat.u_f.val;
 }
     
-char* Eziopy::get_str(byte index){
+char* _HRP_::get_str(byte index){
 	_check_if_no_err_to_get_arg(index, _DTYPE_STR);
   return _args[index].dat.str;
 }
@@ -212,14 +210,14 @@ char* Eziopy::get_str(byte index){
 
 // 모든 함수 인자를 NONE으로 초기화한다.
 // 맨 처음과 매 함수의 실행이 끝난 후 호출하여 인자들을 리셋한다.
-void Eziopy:: _reset_all_args() {
+void _HRP_:: _reset_all_args() {
 	for(_idx=0; _idx < _max_arg_num; _idx++)
 		_args[_idx].type = _DTYPE_NONE; 
 }
 
 // i2c로 지령(cmd)를 넘겨받은 직후 실행되는 함수.
 // 모든 명령을 처리한 후 정상/에러발생 여부를 저장한다.
-void Eziopy:: check() {
+void _HRP_:: check() {
 	if  ( _stat == _STAT_UNDER_NORMAL_PROC ) { 
 		byte index; // 이것 대신 _idx를 사용하면 안됨
 		_cmd = _rcvBuf[0]; //ISR에서 사용되는 변수가 아님
@@ -339,7 +337,7 @@ void Eziopy:: check() {
 
 // i2c ISR functions ----------------------------------------------------------------------
 
-void Eziopy::_onReceive(int count) { //static function
+void _HRP_::_onReceive(int count) { //static function
 	_cmd_i2c = Wire.read(); // first byte is ALWAYS command
 	if (count > 1) {
 		_len_just_rcvd = (byte)count-1;
@@ -350,7 +348,7 @@ void Eziopy::_onReceive(int count) { //static function
 	} //if (count>1)
 }
 
-void Eziopy::_onRequest() {
+void _HRP_::_onRequest() {
 
 	switch(_cmd_i2c) {
 
@@ -390,4 +388,4 @@ void Eziopy::_onRequest() {
 	} 
 }
 
-Eziopy Harper;
+_HRP_ Harper;

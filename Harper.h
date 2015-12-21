@@ -15,7 +15,7 @@ typedef void(*pfunc_t)(void);
 #define __STR_BUF_LENGTH__			32
 #define __MAX_I2C_READ_BUF_LEN__	32
 
-class Eziopy {
+class _HRP_ {
 
 	public:
 
@@ -32,8 +32,8 @@ class Eziopy {
 		static float		get_float(byte index = 0);
 		static char*		get_str(byte index = 0);
 
-		static uint8_t		get_byte(byte index=0);
-		static int16_t		get_int(byte index=0);
+		static uint8_t		get_byte(byte index=0); // same as get_uint8() (unsigned)
+		static int16_t		get_int(byte index=0);	// same as get_int16() (signed)
 
 		static void 		set_ret(int8_t);
 		static void 		set_ret(uint8_t); //static void setReturn(bool);
@@ -44,7 +44,6 @@ class Eziopy {
 		static void 		set_ret(float);
 
 		static void			set_max_arg_num(byte num);
-		//static bool			no_error();
 
    private:
 
@@ -212,9 +211,9 @@ class Eziopy {
 		static byte _max_arg_num;
 		volatile static byte _len_just_rcvd;// = 0;
 
-}; // closing of *class Eziopy*
+}; // closing of *class _HRP_*
 
 // define externally used object name as Harper
-extern Eziopy Harper;
+extern _HRP_ Harper;
 
 #endif
