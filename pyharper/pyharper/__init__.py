@@ -4,54 +4,54 @@ import struct
 import time
 
 class _IN: # invariable number (constants)
-	# commands
-	CMD_READ_DATA			= 0
-	CMD_READ_ID 			= 1
-	CMD_CHANGE_ADDR		= 2
-	CMD_SEND_DATA 			= 3
-	CMD_EXEC_FUNC			= 4
-	CMD_READ_STAT			= 5
-	CMD_CHECK_OK			= 6#CMD_READ_STAT_WRITE	= 6
-	CMD_SEND_BACK			= 7
 
-	# InDeX of ret data
-	IDX_RET_TYPE		= 0 # index of received data list
-	IDX_RET_DATA_STRT	= 1 # index of received data list
-	IDX_RET_INFO 		= 5
+    # commands
+    CMD_READ_DATA			= 0
+    CMD_READ_ID 			= 1
+    CMD_CHANGE_ADDR		= 2
+    CMD_SEND_DATA 			= 3
+    CMD_EXEC_FUNC			= 4
+    CMD_READ_STAT			= 5
+    CMD_CHECK_OK			= 6#CMD_READ_STAT_WRITE	= 6
+    CMD_SEND_BACK			= 7
+
+    # InDeX of ret data
+    IDX_RET_TYPE		= 0 # index of received data list
+    IDX_RET_DATA_STRT	= 1 # index of received data list
+    IDX_RET_INFO 		= 5
  
 	# Data Types
-	DT_NONE		= 0
-	DT_CHAR		= 1
-	DT_SBYTE		= 2
-	DT_BYTE		= 3
-	DT_SHORT		= 5
-	DT_USHORT	= 6
-	DT_LONG		= 7
-	DT_ULONG		= 8
-	DT_FLOAT		= 9
-	DT_DOUBLE	= 10
-	DT_STR		= 11
+    DT_NONE		= 0
+    DT_CHAR		= 1
+    DT_SBYTE		= 2
+    DT_BYTE		= 3
+    DT_SHORT		= 5
+    DT_USHORT	= 6
+    DT_LONG		= 7
+    DT_ULONG		= 8
+    DT_FLOAT		= 9
+    DT_DOUBLE	= 10
+    DT_STR		= 11
 	
-	# dev status error code
-	STAT_UNDER_NORMAL_PROC = 0
-	STAT_CMD_COMPLETED = 1
-	#STAT_ERR_DATA = 2 		   # wrong data received in arduino
-	STAT_ERR_FUNC_INDEX = 3 # function index out of bound
-	STAT_ERR_ARG_INDEX = 4 # function index out of bound
-	STAT_ERR_NO_ARG	= 5
-	STAT_ERR_ARG_TYPE	= 6
+    # dev status error code
+    STAT_UNDER_NORMAL_PROC = 0
+    STAT_CMD_COMPLETED = 1
+    #STAT_ERR_DATA = 2 		   # wrong data received in arduino
+    STAT_ERR_FUNC_INDEX = 3 # function index out of bound
+    STAT_ERR_ARG_INDEX = 4 # function index out of bound
+    STAT_ERR_NO_ARG	= 5
+    STAT_ERR_ARG_TYPE	= 6
 
-	WRITE_SUCCESS = 1
-	#WRITE_FAIL = 0
+    WRITE_SUCCESS = 1
+    #WRITE_FAIL = 0
 
-	EXE_ERR_RETRY		= 3 # maximum retry no when exec_func fails
-	WAIT_COUNT 			= 20 #maximum trial number for i2c communication 
-	TIMEOUT				= 1.0 #sec.
-	MAX_RETRY_CNT 		= 5 # maximum retry no when data corruptted
-	RET_DATA_LEN		= 7
+    EXE_ERR_RETRY		= 3 # maximum retry no when exec_func fails
+    WAIT_COUNT 			= 20 #maximum trial number for i2c communication 
+    TIMEOUT				= 2.0 #sec.
+    MAX_RETRY_CNT 		= 5 # maximum retry no when data corruptted
+    RET_DATA_LEN		= 7
 
-
-class Harper:#class I2cDev
+class Harper:
 
 	def __init__(self, addr, port = 1):
 		self.__addr = addr
@@ -312,6 +312,6 @@ class Harper:#class I2cDev
 					raise Exception( 'i2c communication (read) error.' )
 		return res
 
-from .arduno import ArdUno
-from .tlcd import TextLcd
+#from .arduno import ArdUno
+#from .tlcd import TextLcd
 
