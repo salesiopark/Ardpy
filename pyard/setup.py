@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 setup(
-    name = "pyharper",
+    name = "pyard",
     version = "1.0.0",
     packages = find_packages(),
     #scripts = ['say_hello.py'],

@@ -5,7 +5,7 @@
 * <Wire.h> must be included before including <Harper.h> in user .ino file
 ************************************************************************/
 
-#include "Harper.h"
+#include "Pyard.h"
 #include "Wire.h"
 #include <avr/eeprom.h>
 
@@ -388,4 +388,4 @@ void _HRP_::_onRequest() {
 	} 
 }
 
-_HRP_ Harper;
+_HRP_ Pyard;

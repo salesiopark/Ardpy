@@ -214,6 +214,6 @@ class _HRP_ {
 }; // closing of *class _HRP_*
 
 // define externally used object name as Harper
-extern _HRP_ Harper;
+extern _HRP_ Pyard;
 
 #endif

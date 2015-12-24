@@ -1,6 +1,6 @@
-from . import Harper
+from . import Ard
 
-class TextLcd(Harper):
+class TLcd(Ard):
 
 	def __init__(self, addr, port = 1):
 		super().__init__(addr, port = port)
@@ -11,8 +11,8 @@ class TextLcd(Harper):
 		return self._exec_func(0)
 
 	def print(self, text):
-		self._send_str(text) # 1st argument
-		return self._exec_func(1) # exec ditigtalWrite() function
+		self._send_str(text)
+		return self._exec_func(1)
 
 	def display(self):
 		return self._exec_func(2)
@@ -24,6 +24,3 @@ class TextLcd(Harper):
 		self._send_byte(x)
 		self._send_byte(y, 1)
 		return self._exec_func(4)
-
-	def countUp(self):
-		return self._exec_func(5)

@@ -45,14 +45,15 @@ class _IN: # invariable number (constants)
     MAX_RETRY_CNT 		= 5 # maximum retry no when data corruptted
     RET_DATA_LEN		= 7
 
-class Harper:
+
+class Ard:
 
     def __init__(self, addr, port = 1):
         self.__addr = addr
-        self.__i2c = Harper.__smbus.SMBus(port)
+        self.__i2c = Ard.__smbus.SMBus(port)
         self.__read_id_info()
         self.__reset_args()
-        print('Harper device (addr:0x%x, id:%d) ready.'%(addr,self.__id))
+        print('pyard device (addr:0x%x, id:%d) ready.'%(addr,self.__id))
 
     @property
     def device_id(self):
@@ -83,44 +84,44 @@ class Harper:
         print('The device must be reset to use new address.')
 
     def _send_int8(self, val, index = 0):
-        lst_data = list(Harper.__struct.pack('b', val))
+        lst_data = list(Ard.__struct.pack('b', val))
         self.__reg_arg(index, _IN.DT_SBYTE, lst_data)
 
     def _send_uint8(self, val, index = 0):
-        lst_data = list(Harper.__struct.pack('B', val)) 
+        lst_data = list(Ard.__struct.pack('B', val)) 
         self.__reg_arg(index, _IN.DT_BYTE, lst_data)
 
     def _send_byte(self, val, index = 0):
-        lst_data = list(Harper.__struct.pack('B', val)) 
+        lst_data = list(Ard.__struct.pack('B', val)) 
         self.__reg_arg(index, _IN.DT_BYTE, lst_data)
 
     def _send_int16(self, val, index = 0):
-        lst_data =  list(Harper.__struct.pack('h', val)) 
+        lst_data =  list(Ard.__struct.pack('h', val)) 
         self.__reg_arg(index, _IN.DT_SHORT, lst_data)
 
     def _send_int(self, val, index = 0):
-        lst_data =  list(Harper.__struct.pack('h', val)) 
+        lst_data =  list(Ard.__struct.pack('h', val)) 
         self.__reg_arg(index, _IN.DT_SHORT, lst_data)
 
     def _send_uint16(self, val, index = 0):
-        lst_data = list(Harper.__struct.pack('H', val))
+        lst_data = list(Ard.__struct.pack('H', val))
         self.__reg_arg(index, _IN.DT_USHORT, lst_data)
 
     def _send_int32(self, val, index = 0):
-        lst_data =  list(Harper.__struct.pack('l', val))
+        lst_data =  list(Ard.__struct.pack('l', val))
         self.__reg_arg(index, _IN.DT_LONG, lst_data)
 
     def _send_uint32(self, val, index = 0):
-        lst_data =  list(Harper.__struct.pack('L', val))
+        lst_data =  list(Ard.__struct.pack('L', val))
         self.__reg_arg(index, _IN.DT_ULONG, lst_data)
 
     def _send_float(self, fval, index = 0):
-        lst_data =  list(Harper.__struct.pack('f', fval)) 
+        lst_data =  list(Ard.__struct.pack('f', fval)) 
         self.__reg_arg(index, _IN.DT_FLOAT, lst_data)
 
     def _send_str(self, string, index = 0):
         """
-        Transmit string to the harper (arduino) device.
+        Transmit string to the pyard (arduino) device.
         Up to 27 ASCII characters can be transmitted.
         """
         lst_data = list( string.encode('utf-8') ) 
@@ -128,7 +129,7 @@ class Harper:
         self.__reg_arg(index, _IN.DT_STR, lst_data)
 
     def _exec_func(self, index):
-        """execute function in the Harper (arduino) device"""
+        """execute function in the pyard (arduino) device"""
         if index >= self.__num_funcs:
             raise Exception('Index of func out of bound (dev:0x%x)'%self.__addr)
 
@@ -148,19 +149,19 @@ class Harper:
 
                 #print("ret type:%d"%dtype)
                 if dtype == _IN.DT_BYTE:
-                    return ( Harper.__struct.unpack('B', bytes([lst[0]])) )[0]
+                    return ( Ard.__struct.unpack('B', bytes([lst[0]])) )[0]
                 elif dtype == _IN.DT_SBYTE:
-                    return ( Harper.__struct.unpack('b', bytes([ lst[0]])) )[0]
+                    return ( Ard.__struct.unpack('b', bytes([ lst[0]])) )[0]
                 elif dtype == _IN.DT_USHORT:
-                    return ( Harper.__struct.unpack('H', bytes(lst[0:2])) )[0]
+                    return ( Ard.__struct.unpack('H', bytes(lst[0:2])) )[0]
                 elif dtype == _IN.DT_SHORT:
-                    return ( Harper.__struct.unpack('h', bytes(lst[0:2])) )[0]
+                    return ( Ard.__struct.unpack('h', bytes(lst[0:2])) )[0]
                 elif dtype == _IN.DT_LONG:
-                    return ( Harper.__struct.unpack('l', bytes( lst )) )[0]
+                    return ( Ard.__struct.unpack('l', bytes( lst )) )[0]
                 elif dtype == _IN.DT_ULONG:
-                    return ( Harper.__struct.unpack('L', bytes( lst ) ) )[0]
+                    return ( Ard.__struct.unpack('L', bytes( lst ) ) )[0]
                 elif dtype == _IN.DT_FLOAT:
-                    return ( Harper.__struct.unpack('f', bytes(lst)) )[0]
+                    return ( Ard.__struct.unpack('f', bytes(lst)) )[0]
                 else : return None #_IN.DT_NONE
 
             else:
@@ -191,9 +192,9 @@ class Harper:
             self.__lst_args.append(None)
 
     def __read_id_info(self):
-        """read id, max_arg_num and num_funcs from Harper device"""
+        """read id, max_arg_num and num_funcs from pyard device"""
         info = self.__read_i2c_data(cmd=_IN.CMD_READ_ID, length = 7)
-        self.__id = Harper.__struct.unpack('L', bytes(info[0:4]))[0]
+        self.__id = Ard.__struct.unpack('L', bytes(info[0:4]))[0]
         self.__max_arg_num = info[4]
         self.__num_funcs = info[5]
 
@@ -226,10 +227,10 @@ class Harper:
         #print('lst_pckt:%s'%lst_pckt)
 
     def __wait_until_cmd_handled(self):
-        tmStart = Harper.__datetime.datetime.now()
+        tmStart = Ard.__datetime.datetime.now()
         cmd_completed = False
         while not cmd_completed:
-            tmElapsed = Harper.__datetime.datetime.now() - tmStart
+            tmElapsed = Ard.__datetime.datetime.now() - tmStart
             if (tmElapsed.total_seconds() > _IN.TIMEOUT):
                 raise Exception('timeout for waiting device ready.')
             stat = self.__read_stat()

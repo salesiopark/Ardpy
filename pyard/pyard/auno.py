@@ -1,7 +1,7 @@
 # eziopy.arduino
-from . import Harper
+from . import Ard
 
-class ArdUno(Harper):
+class AUno(Ard):
 	INPUT = 0
 	OUTPUT = 1
 	INPUT_PULLUP = 2
