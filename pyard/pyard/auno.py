@@ -1,4 +1,3 @@
-# eziopy.arduino
 from . import Ard
 
 class AUno(Ard):

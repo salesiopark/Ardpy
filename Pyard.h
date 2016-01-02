@@ -73,11 +73,11 @@ class _HRP_ {
 			_STAT_UNDER_NORMAL_PROC	= 0,
 			STAT_CMD_COMPLETED		= 1,
 			_STAT_ERR_DATA_RCVD		= 2, // wrong data received
-			_STAT_ERR_FUNC_INDEX		= 3, // function index out of bound
-			//_STAT_ERR_ARG_INDEX		= 4, // argument index out of bound
+			//_STAT_ERR_FUNC_INDEX	= 3, // function index out of bound
+			//_STAT_ERR_ARG_INDEX	= 4, // argument index out of bound
 			STAT_ERR_NO_ARG			= 5,
-			STAT_ERR_ARG_TYPE			= 6,
-			//_STAT_ERR_DATA_CSUM		= 7, // wrong data received
+			STAT_ERR_ARG_TYPE		= 6,
+			//_STAT_ERR_DATA_CSUM	= 7, // wrong data received
 
 			_STAT_ERR_DATA_100		= 100, // wrong data received
 			_STAT_ERR_DATA_101		= 101, // wrong data received
