@@ -6,8 +6,10 @@ setup(
     #scripts = ['say_hello.py'],
 
     # Project uses reStructuredText, so ensure that the docutils get
+
     # installed or upgraded on the target machine
-    install_requires = ['smbus>=1.1'],
+    #install_requires = ['smbus>=1.1'],
+
     # metadata for upload to PyPI
     author = "salesiopark",
     author_email = "salesiopark@gmail.com",
@@ -17,4 +19,5 @@ setup(
     url = "http://github.com/Harper",   # project home page, if any
 
     # could also include long_description, download_url, classifiers, etc.
+    classifiers = ['Programming Language :: Python :: 3'],
 )

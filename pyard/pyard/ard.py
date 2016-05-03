@@ -6,7 +6,7 @@ class Ard:
     CMD_SEND_DATA   = 3
     CMD_EXEC_FUNC   = 4
     CMD_READ_STAT   = 5
-    CMD_CHECK_OK    = 6#CMD_READ_STAT_WRITE	= 6
+    CMD_CHECK_OK    = 6 #CMD_READ_STAT_WRITE	= 6
     CMD_SEND_BACK   = 7
 
     # InDeX of ret data
@@ -31,8 +31,6 @@ class Ard:
     STAT_UNDER_NORMAL_PROC  = 0
     STAT_CMD_COMPLETED      = 1
     #STAT_ERR_DATA          = 2 # wrong data received in arduino
-    #STAT_ERR_FUNC_INDEX    = 3 # this is checked in python
-    #STAT_ERR_ARG_INDEX     = 4 # this is checked in python
     STAT_ERR_NO_ARG         = 5
     STAT_ERR_ARG_TYPE       = 6
 
@@ -42,7 +40,7 @@ class Ard:
     EXE_ERR_RETRY	= 3 # maximum retry no when exec_func fails
     WAIT_COUNT 		= 20 #maximum trial number for i2c communication 
     TIMEOUT			= 2.0 #sec.
-    MAX_RETRY_CNT	= 5 # maximum retry no when data corruptted
+    MAX_RETRY_CNT	= 5 # maximum retry number when data corruptted
     RET_DATA_LEN	= 7
 
     def __init__(self, addr, port = 1):
