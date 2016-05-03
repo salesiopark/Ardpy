@@ -1,13 +1,13 @@
-class Ard:
+class Pyard:
 
-    CMD_READ_DATA   = 0
-    CMD_READ_ID     = 1
-    CMD_CHANGE_ADDR = 2
-    CMD_SEND_DATA   = 3
-    CMD_EXEC_FUNC   = 4
-    CMD_READ_STAT   = 5
-    CMD_CHECK_OK    = 6 #CMD_READ_STAT_WRITE	= 6
-    CMD_SEND_BACK   = 7
+    __CMD_READ_DATA   = 0
+    __CMD_READ_ID     = 1
+    __CMD_CHANGE_ADDR = 2
+    __CMD_SEND_DATA   = 3
+    __CMD_EXEC_FUNC   = 4
+    __CMD_READ_STAT   = 5
+    __CMD_CHECK_OK    = 6 #CMD_READ_STAT_WRITE	= 6
+    __CMD_SEND_BACK   = 7
 
     # InDeX of ret data
     IDX_RET_TYPE		= 0 # index of received data list
@@ -34,7 +34,7 @@ class Ard:
     STAT_ERR_NO_ARG         = 5
     STAT_ERR_ARG_TYPE       = 6
 
-    WRITE_SUCCESS   = 1
+    #WRITE_SUCCESS   = 1
     #WRITE_FAIL     = 0
 
     EXE_ERR_RETRY	= 3 # maximum retry no when exec_func fails
@@ -45,7 +45,7 @@ class Ard:
 
     def __init__(self, addr, port = 1):
         self.__addr = addr
-        self.__i2c = Ard.__smbus.SMBus(port)
+        self.__i2c = Pyard.__smbus.SMBus(port)
         self.__read_id_info()
         self.__reset_args()
         print('pyard device (addr:0x%x, id:%d) ready.'%(addr,self.__id))
@@ -72,15 +72,15 @@ class Ard:
             raise Exception('i2c address is out of bound.')
         ans = input('This will change the i2c addr of the device. proceed? [y/n]')
         if ans!='y': return
-        byte_list = [self.CMD_CHANGE_ADDR, addr] 
-        self.__write_i2c_cmd(byte_list, self.CMD_CHANGE_ADDR)
+        byte_list = [self.__CMD_CHANGE_ADDR, addr] 
+        self.__write_i2c_cmd(byte_list, self.__CMD_CHANGE_ADDR)
         self.__wait_until_cmd_handled()
         print('Address of the device has changed to 0x%x.'%self.addr)
         print('The device must be reset to use new address.')
 
     """====================================================================
         슬레이브에 보낼 데이터 패킷을 구성한 후 __lst_args 리스트에 저장하는 함수들
-        패킷 구성: [CMD_SEND_DATA, arg_index, data_type, data0, data1, ... ]    
+        패킷 구성: [__CMD_SEND_DATA, arg_index, data_type, data0, data1, ... ]    
         실제로 보내는 것은 *함수를 실행하는 시점*에서 한다.
         이렇게 한 이유는 만약 함수를 실행하는 시점에서 오류가 발생한다면
         처음부터(즉, 인자를 보내는 것 부터) 다시 수행할 수 있도록 하기 위함이다.
@@ -89,45 +89,80 @@ class Ard:
     def __reg_arg(self, index, dtype, lst_data):
         if index >= self.__max_arg_num:
             raise Exception('Arg index must be under %d.'%self.__max_arg_num)
-        lst_pckt = [self.CMD_SEND_DATA, index, dtype ] 
+        lst_pckt = [self.__CMD_SEND_DATA, index, dtype ] 
         lst_pckt.extend(lst_data)
         self.__lst_args[index] = lst_pckt
         #print('lst_pckt:%s'%lst_pckt)
 
+    # 03/May/2016 replaced _send... funcs into the folllowing one func
+    def set_arg(self, val, index=0, type='int'):
+        if type == 'int8':
+            lst_data = list(Pyard.__struct.pack('b', val))
+            self.__reg_arg(index, self.DT_SBYTE, lst_data)
+        elif type == 'uint8' or type == 'byte':
+            lst_data = list(Pyard.__struct.pack('B', val)) 
+            self.__reg_arg(index, self.DT_BYTE, lst_data)
+        elif type =='int16' or type == 'int' :
+            lst_data =  list(Pyard.__struct.pack('h', val)) 
+            self.__reg_arg(index, self.DT_SHORT, lst_data)
+        elif type == 'uint16':
+            lst_data = list(Pyard.__struct.pack('H', val))
+            self.__reg_arg(index, self.DT_USHORT, lst_data)
+        elif type == 'int32':
+            lst_data =  list(Pyard.__struct.pack('l', val))
+            self.__reg_arg(index, self.DT_LONG, lst_data)
+        elif type == 'uint32':
+            lst_data =  list(Pyard.__struct.pack('L', val))
+            self.__reg_arg(index, self.DT_ULONG, lst_data)
+        elif type == 'float':
+            lst_data =  list(Pyard.__struct.pack('f', fval)) 
+            self.__reg_arg(index, self.DT_FLOAT, lst_data)
+        elif type == 'str':
+            """
+            Transmit string to the Pyard (arduino) device.
+            Up to 27 ASCII characters can be transmitted.
+            """
+            lst_data = list( string.encode('utf-8') ) 
+            lst_data.append(0) # append null character in the end
+            self.__reg_arg(index, self.DT_STR, lst_data)
+        else:
+            raise Exception('Unknown arg type.')
+
+    '''
     def _send_int8(self, val, index = 0):
-        lst_data = list(Ard.__struct.pack('b', val))
+        lst_data = list(Pyard.__struct.pack('b', val))
         self.__reg_arg(index, self.DT_SBYTE, lst_data)
 
     def _send_uint8(self, val, index = 0):
-        lst_data = list(Ard.__struct.pack('B', val)) 
+        lst_data = list(Pyard.__struct.pack('B', val)) 
         self.__reg_arg(index, self.DT_BYTE, lst_data)
 
     def _send_byte(self, val, index = 0):
-        lst_data = list(Ard.__struct.pack('B', val)) 
+        lst_data = list(Pyard.__struct.pack('B', val)) 
         self.__reg_arg(index, self.DT_BYTE, lst_data)
 
     def _send_int16(self, val, index = 0):
-        lst_data =  list(Ard.__struct.pack('h', val)) 
+        lst_data =  list(Pyard.__struct.pack('h', val)) 
         self.__reg_arg(index, self.DT_SHORT, lst_data)
 
     def _send_int(self, val, index = 0):
-        lst_data =  list(Ard.__struct.pack('h', val)) 
+        lst_data =  list(Pyard.__struct.pack('h', val)) 
         self.__reg_arg(index, self.DT_SHORT, lst_data)
 
     def _send_uint16(self, val, index = 0):
-        lst_data = list(Ard.__struct.pack('H', val))
+        lst_data = list(Pyard.__struct.pack('H', val))
         self.__reg_arg(index, self.DT_USHORT, lst_data)
 
     def _send_int32(self, val, index = 0):
-        lst_data =  list(Ard.__struct.pack('l', val))
+        lst_data =  list(Pyard.__struct.pack('l', val))
         self.__reg_arg(index, self.DT_LONG, lst_data)
 
     def _send_uint32(self, val, index = 0):
-        lst_data =  list(Ard.__struct.pack('L', val))
+        lst_data =  list(Pyard.__struct.pack('L', val))
         self.__reg_arg(index, self.DT_ULONG, lst_data)
 
     def _send_float(self, fval, index = 0):
-        lst_data =  list(Ard.__struct.pack('f', fval)) 
+        lst_data =  list(Pyard.__struct.pack('f', fval)) 
         self.__reg_arg(index, self.DT_FLOAT, lst_data)
 
     def _send_str(self, string, index = 0):
@@ -138,6 +173,7 @@ class Ard:
         lst_data = list( string.encode('utf-8') ) 
         lst_data.append(0) # append null character in the end
         self.__reg_arg(index, self.DT_STR, lst_data)
+    '''
 
     """====================================================================
         아두이노의 함수를 실행하는 메서드
@@ -147,7 +183,7 @@ class Ard:
        ====================================================================
     """
 
-    def _exec_func(self, index):
+    def exec_func(self, index):
         """execute function in the pyard (arduino) device"""
         if index >= self.__num_funcs:
             raise Exception('Index of func out of bound (dev:0x%x)'%self.__addr)
@@ -160,8 +196,8 @@ class Ard:
             # and then, send func execution command
             # wait until func finishied
             self.__send_args() 
-            send_pckt = [self.CMD_EXEC_FUNC, index] 
-            self.__write_i2c_cmd(send_pckt, self.CMD_EXEC_FUNC) 
+            send_pckt = [self.__CMD_EXEC_FUNC, index] 
+            self.__write_i2c_cmd(send_pckt, self.__CMD_EXEC_FUNC) 
             stat = self.__wait_until_cmd_handled() 
 
             # 함수 실행이 성공한 경우
@@ -173,19 +209,19 @@ class Ard:
                 # 첫 번째 요소만 빼낸 다음 그것을 반환한다. (그래서 끝에 [0]이 붙은 것임)
 
                 if dtype == self.DT_BYTE:
-                    return ( Ard.__struct.unpack('B', bytes([lst[0]])) )[0]
+                    return ( Pyard.__struct.unpack('B', bytes([lst[0]])) )[0]
                 elif dtype == self.DT_SBYTE:
-                    return ( Ard.__struct.unpack('b', bytes([ lst[0]])) )[0]
+                    return ( Pyard.__struct.unpack('b', bytes([ lst[0]])) )[0]
                 elif dtype == self.DT_USHORT:
-                    return ( Ard.__struct.unpack('H', bytes(lst[0:2])) )[0]
+                    return ( Pyard.__struct.unpack('H', bytes(lst[0:2])) )[0]
                 elif dtype == self.DT_SHORT:
-                    return ( Ard.__struct.unpack('h', bytes(lst[0:2])) )[0]
+                    return ( Pyard.__struct.unpack('h', bytes(lst[0:2])) )[0]
                 elif dtype == self.DT_LONG:
-                    return ( Ard.__struct.unpack('l', bytes( lst )) )[0]
+                    return ( Pyard.__struct.unpack('l', bytes( lst )) )[0]
                 elif dtype == self.DT_ULONG:
-                    return ( Ard.__struct.unpack('L', bytes( lst ) ) )[0]
+                    return ( Pyard.__struct.unpack('L', bytes( lst ) ) )[0]
                 elif dtype == self.DT_FLOAT:
-                    return ( Ard.__struct.unpack('f', bytes(lst)) )[0]
+                    return ( Pyard.__struct.unpack('f', bytes(lst)) )[0]
                 else : return None #self.DT_NONE
 
             # 함수 실행이 실패한 경우 정해진 횟수 만큼 다시 실행을 반복한 후
@@ -205,6 +241,16 @@ class Ard:
                         #print('info:%d'%info)
                         raise Exception('Unknown error(%d) occurred.(dev:0x%x)'%(stat, self.__addr))
 
+    '''
+        handy method for function call
+        call_func(0, [11,'byte'], [3.14,'float']...)
+    '''
+    def func(self, index, *args):
+        for k in range(len(args)):
+            self.set_arg(args[k][0], k, args[k][1]) #value, index, type
+        self.exec_func(index)
+            
+
     # internal modules and functions =================================
     import smbus as __smbus
     import struct as __struct
@@ -218,8 +264,8 @@ class Ard:
 
     def __read_id_info(self):
         """read id, max_arg_num and num_funcs from pyard device"""
-        info = self.__read_i2c_data(cmd=self.CMD_READ_ID, length = 7)
-        self.__id = Ard.__struct.unpack('L', bytes(info[0:4]))[0]
+        info = self.__read_i2c_data(cmd=self.__CMD_READ_ID, length = 7)
+        self.__id = Pyard.__struct.unpack('L', bytes(info[0:4]))[0]
         self.__max_arg_num = info[4]
         self.__num_funcs = info[5]
 
@@ -234,7 +280,7 @@ class Ard:
             if arg_pckt != None:
                 SuccessToSendArg = False
                 while not SuccessToSendArg :
-                    self.__write_i2c_cmd(arg_pckt, self.CMD_SEND_DATA)
+                    self.__write_i2c_cmd(arg_pckt, self.__CMD_SEND_DATA)
                     stat = self.__wait_until_cmd_handled()
                     if stat == self.STAT_CMD_COMPLETED:
                         SuccessToSendArg = True
@@ -254,10 +300,10 @@ class Ard:
     """
 
     def __wait_until_cmd_handled(self):
-        tmStart = Ard.__datetime.datetime.now()
+        tmStart = Pyard.__datetime.datetime.now()
         cmd_completed = False
         while not cmd_completed:
-            tmElapsed = Ard.__datetime.datetime.now() - tmStart
+            tmElapsed = Pyard.__datetime.datetime.now() - tmStart
             if (tmElapsed.total_seconds() > self.TIMEOUT):
                 raise Exception('timeout for waiting device ready.')
             stat = self.__read_stat()
@@ -270,7 +316,7 @@ class Ard:
     """
 
     def __read_stat(self):
-        res = self.__read_i2c_data(cmd = self.CMD_READ_STAT, length =2)
+        res = self.__read_i2c_data(cmd = self.__CMD_READ_STAT, length =2)
         return res[0]
 
     """====================================================================
@@ -288,7 +334,7 @@ class Ard:
     """
 
     def __read_confirm_ok(self):
-        res = self.__read_i2c_data(cmd = self.CMD_CHECK_OK, length =2)
+        res = self.__read_i2c_data(cmd = self.__CMD_CHECK_OK, length =2)
         return res[0]
 
     """====================================================================
@@ -297,7 +343,7 @@ class Ard:
     """
 
     def __read_data(self):
-        res = self.__read_i2c_data(cmd=self.CMD_READ_DATA, length = self.RET_DATA_LEN)
+        res = self.__read_i2c_data(cmd=self.__CMD_READ_DATA, length = self.RET_DATA_LEN)
         return (	res[self.IDX_RET_TYPE],
                     res[self.IDX_RET_DATA_STRT:(self.IDX_RET_DATA_STRT+4)],
                     res[self.IDX_RET_INFO],)		
@@ -327,7 +373,7 @@ class Ard:
             try:
                 self.__i2c.write_i2c_block_data(self.__addr, cmd, byte_list)
                 #print('wrt_data (cmd:%d) >> lst:%s'%(cmd, byte_list))
-                sent_back = self.__read_i2c_data(self.CMD_SEND_BACK, len(byte_list), checksum=False) # 보냈던 데이터를 그대로 다시 받는다
+                sent_back = self.__read_i2c_data(self.__CMD_SEND_BACK, len(byte_list), checksum=False) # 보냈던 데이터를 그대로 다시 받는다
                 #print('back_data << lst:%s'%sent_back)
                 if byte_list == sent_back:  # 보낸 것과 받은 것이 같은 경우에만
                     writeSuccess = True     # 성공한 것으로 
