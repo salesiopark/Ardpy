@@ -1,46 +1,46 @@
 /***********************************************************************
-* Harper.h ver 1.0
+* Pyard.h ver 1.0
 * Arduino library for i2c (slave) communication with Raspberry pi.
-* by salesioPark(박장현, 국립목포대학교, 전기제어공학과)
-* <Wire.h> must be included before including <Harper.h> in user .ino file
+* by salesiopark(박장현, 국립목포대학교, 전기제어공학과)
+* <Wire.h> must be included before including <Pyard.h> in user .ino file
 ************************************************************************/
 
 #include "Pyard.h"
 #include "Wire.h"
 #include <avr/eeprom.h>
 
-// static memeber initialization --------------------------------------------
+// static memebers initialization --------------------------------------------
 
-_HRP_::_U_Id				_HRP_::_u_id = {0xffffffff, };
-volatile byte				_HRP_::_cmd = 0 ;
-volatile byte				_HRP_::_cmd_i2c = 0 ;
-volatile byte				_HRP_::_rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
-volatile _HRP_::_U_Ret	_HRP_::_u_ret = {{1,} };
-char							_HRP_::_strBuf[ __STR_BUF_LENGTH__ ] = {0,};
-byte							_HRP_::_checksum = 0;
-byte							_HRP_::_idx = 0;
-volatile byte				_HRP_::_stat = 0;
-//volatile byte 				_HRP_::_stat_write = 1;
-volatile byte 				_HRP_::_statArr[2]={0,};
-volatile _HRP_::_S_Arg*	_HRP_::_args = NULL;
-byte 							_HRP_::_max_arg_num = __INIT_MAX_ARG_NUM__;
-pfunc_t*						_HRP_::_tmpFuncArr = NULL;
-byte							_HRP_::_num_funcs = 0;
-pfunc_t*						_HRP_::_funcArr = NULL;
-volatile byte 				_HRP_::_len_just_rcvd = 0;
+_HRP_::_U_Id            _HRP_::_u_id = {0xffffffff, };
+volatile byte           _HRP_::_cmd = 0 ;
+volatile byte           _HRP_::_cmd_i2c = 0 ;
+volatile byte           _HRP_::_rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
+volatile _HRP_::_U_Ret  _HRP_::_u_ret = {{1,} };
+char                    _HRP_::_strBuf[ __STR_BUF_LENGTH__ ] = {0,};
+byte                    _HRP_::_checksum = 0;
+byte                    _HRP_::_idx = 0;
+volatile byte           _HRP_::_stat = 0;
+volatile byte           _HRP_::_statArr[2]={0,};
+volatile _HRP_::_S_Arg* _HRP_::_args = NULL;
+byte                    _HRP_::_max_arg_num = __INIT_MAX_ARG_NUM__;
+pfunc_t*                _HRP_::_tmpFuncArr = NULL;
+byte                    _HRP_::_num_funcs = 0;
+pfunc_t*                _HRP_::_funcArr = NULL;
+volatile byte           _HRP_::_len_just_rcvd = 0;
+
 // ---------
 void _HRP_::set_max_arg_num(byte num) {
 ///*
-	if (_args == NULL) // before calling begin() 
+	if (_args == NULL) { // before calling begin() 
 		_max_arg_num = num;
-	else { // after calling begin() 
+	} else { // after calling begin() 
 		delete [] _args;
 		_args = new _S_Arg[num];
 	}
 //*/
 }
 
-// set_ret() functions overloading definitions -----------------------------------------
+// set_ret() function overloading definitions -----------------------------------------
 
 void _HRP_::set_ret(uint8_t byVal) {
 	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
@@ -98,7 +98,8 @@ byte _HRP_::begin(byte addr, uint32_t dev_id) {
 	_u_id.s_id.val = dev_id;
 	_u_id.s_id.numArgs = _max_arg_num;
 	_u_id.s_id.numFuncs = _num_funcs;
-	//_u_id.s_id.numInfo = 0; //reserved
+	
+    // calc checksum
 	_u_id.s_id.checksum = 0xff - (byte)(_CMD_READ_ID
 			+ _u_id.byArr[0] + _u_id.byArr[1] + _u_id.byArr[2] + _u_id.byArr[3]
 			+ _u_id.byArr[4]
