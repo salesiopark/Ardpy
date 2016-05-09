@@ -1,3 +1,4 @@
 from .pyard import Pyard
-#from .auno import AUno
-#from .tlcd import TLcd
+from .arduno import Arduno #id=0
+from .ledm import Ledm # id=1
+#from .tlcd import TLcd #id=2

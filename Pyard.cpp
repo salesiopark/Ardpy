@@ -355,7 +355,6 @@ void _HRP_::_onRequest() {
 
 		case _CMD_SEND_BACK:
 			Wire.write( (const byte*)_rcvBuf, _len_just_rcvd);
-			//_stat_write = _WRT_FAIL;//<-
 			break;
 
 		case _CMD_CHECK_OK:
@@ -363,6 +362,7 @@ void _HRP_::_onRequest() {
 			_statArr[0] = _stat;
 			_statArr[1]	=	0xff-(_CMD_CHECK_OK + _stat);
 			Wire.write( (const byte*)_statArr, 2);
+            check();//<- place here instead of in loop() function ***
 			break;
 
 		case _CMD_READ_STAT:
