@@ -1,4 +1,4 @@
-class Pyard:
+class Ardpy:
     # command constant to arduino
     __CMD_READ_DATA   = 0
     __CMD_READ_ID     = 1
@@ -42,10 +42,10 @@ class Pyard:
 
     def __init__(self, addr, port = 1):
         self.__addr = addr
-        self.__i2c = Pyard.__smbus.SMBus(port)
+        self.__i2c = self.__smbus.SMBus(port)
         self.__read_id_info()
         self.__reset_args()
-        print('pyard device (addr:0x%x, id:%d) ready.'%(addr,self.__id))
+        print('Ardpy device (addr:0x%x, id:%d) ready.'%(addr,self.__id))
         print('number of funcs is %d and max number of args is %d.'%(self.__num_funcs, self.__max_arg_num))
 
         '''
@@ -111,7 +111,7 @@ class Pyard:
     # 03/May/2016 replaced _send... funcs into the folllowing one func
     def _set_arg(self, val, index=0, type='byte'):
         """
-        This method sets an input argument of the Arduino(using Pyard lib) function.
+        This method sets an input argument of the Arduino(using Ardpy lib) function.
         The type is one of followings:
             'int8'
             'uint8' : This is the same as 'byte' (default value)
@@ -124,29 +124,29 @@ class Pyard:
         Note that in case of 'str', the maxium length of string is 27.
         """
         if type == 'int8':
-            lst_data = list(Pyard.__struct.pack('b', val))
+            lst_data = list(self.__struct.pack('b', val))
             self.__reg_arg(index, self.__DT_SBYTE, lst_data)
         elif type == 'uint8' or type == 'byte':
-            lst_data = list(Pyard.__struct.pack('B', val)) 
+            lst_data = list(self.__struct.pack('B', val)) 
             self.__reg_arg(index, self.__DT_BYTE, lst_data)
         elif type =='int16' or type == 'int' :
-            lst_data =  list(Pyard.__struct.pack('h', val)) 
+            lst_data =  list(self.__struct.pack('h', val)) 
             self.__reg_arg(index, self.__DT_SHORT, lst_data)
         elif type == 'uint16':
-            lst_data = list(Pyard.__struct.pack('H', val))
+            lst_data = list(self.__struct.pack('H', val))
             self.__reg_arg(index, self.__DT_USHORT, lst_data)
         elif type == 'int32':
-            lst_data =  list(Pyard.__struct.pack('l', val))
+            lst_data =  list(self.__struct.pack('l', val))
             self.__reg_arg(index, self.__DT_LONG, lst_data)
         elif type == 'uint32':
-            lst_data =  list(Pyard.__struct.pack('L', val))
+            lst_data =  list(self.__struct.pack('L', val))
             self.__reg_arg(index, self.__DT_ULONG, lst_data)
         elif type == 'float':
-            lst_data =  list(Pyard.__struct.pack('f', fval)) 
+            lst_data =  list(self.__struct.pack('f', fval)) 
             self.__reg_arg(index, self.__DT_FLOAT, lst_data)
         elif type == 'str':
             """
-            Transmit string to the Pyard (arduino) device.
+            Transmit string to the Ardpy (arduino) device.
             Up to 27 ASCII characters can be transmitted.
             """
             lst_data = list( string.encode('utf-8') ) 
@@ -212,9 +212,9 @@ class Pyard:
 
     def _exec_func(self, index):
         """
-        This method executes function in the Pyard(arduino) device.
+        This method executes function in the Ardpy(arduino) device.
         If there are input arguments, they are must be set prior using _set_arg().
-        For example, arduino (using Pyard lib) function with one byte arguent,
+        For example, arduino (using Ardpy lib) function with one byte arguent,
             
             obj._set_arg(byte_val)
             obj._exec_func(0)
@@ -251,19 +251,19 @@ class Pyard:
                 # 첫 번째 요소만 빼낸 다음 그것을 반환한다. (그래서 끝에 [0]이 붙은 것임)
 
                 if dtype == self.__DT_BYTE:
-                    return ( Pyard.__struct.unpack('B', bytes([lst[0]])) )[0]
+                    return ( self.__struct.unpack('B', bytes([lst[0]])) )[0]
                 elif dtype == self.__DT_SBYTE:
-                    return ( Pyard.__struct.unpack('b', bytes([ lst[0]])) )[0]
+                    return ( self.__struct.unpack('b', bytes([ lst[0]])) )[0]
                 elif dtype == self.__DT_USHORT:
-                    return ( Pyard.__struct.unpack('H', bytes(lst[0:2])) )[0]
+                    return ( self.__struct.unpack('H', bytes(lst[0:2])) )[0]
                 elif dtype == self.__DT_SHORT:
-                    return ( Pyard.__struct.unpack('h', bytes(lst[0:2])) )[0]
+                    return ( self.__struct.unpack('h', bytes(lst[0:2])) )[0]
                 elif dtype == self.__DT_LONG:
-                    return ( Pyard.__struct.unpack('l', bytes( lst )) )[0]
+                    return ( self.__struct.unpack('l', bytes( lst )) )[0]
                 elif dtype == self.__DT_ULONG:
-                    return ( Pyard.__struct.unpack('L', bytes( lst ) ) )[0]
+                    return ( self.__struct.unpack('L', bytes( lst ) ) )[0]
                 elif dtype == self.__DT_FLOAT:
-                    return ( Pyard.__struct.unpack('f', bytes(lst)) )[0]
+                    return ( self.__struct.unpack('f', bytes(lst)) )[0]
                 else : return None #self.DT_NONE
 
             # 함수 실행이 실패한 경우 정해진 횟수 만큼 다시 실행을 반복한 후
@@ -306,9 +306,9 @@ class Pyard:
             self.__lst_args.append(None)
 
     def __read_id_info(self):
-        """read id, max_arg_num and num_funcs from pyard device"""
+        """read id, max_arg_num and num_funcs from Ardpy device"""
         info = self.__read_i2c_data(cmd=self.__CMD_READ_ID, length = 7)
-        self.__id = Pyard.__struct.unpack('L', bytes(info[0:4]))[0]
+        self.__id = self.__struct.unpack('L', bytes(info[0:4]))[0]
         self.__max_arg_num = info[4]
         self.__num_funcs = info[5]
 
@@ -343,10 +343,10 @@ class Pyard:
     """
 
     def __wait_until_cmd_handled(self):
-        tmStart = Pyard.__datetime.datetime.now()
+        tmStart = self.__datetime.datetime.now()
         cmd_completed = False
         while not cmd_completed:
-            tmElapsed = Pyard.__datetime.datetime.now() - tmStart
+            tmElapsed = self.__datetime.datetime.now() - tmStart
             if (tmElapsed.total_seconds() > self.__TIMEOUT):
                 raise Exception('Timeout for waiting device ready.')
             stat = self.__read_stat()

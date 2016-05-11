@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 setup(
-    name = "pyard",
+    name = "ardpy",
     version = "1.0.0",
     packages = find_packages(),
     #scripts = ['say_hello.py'],
@@ -13,11 +13,11 @@ setup(
     # metadata for upload to PyPI
     author = "salesiopark",
     author_email = "salesiopark@gmail.com",
-    description = "package for raspberry pi I2C communication with Arduino",
+    description = "package for raspberry pi i2c communication with Arduino",
     license = "PSF",
     keywords = "arduino i2c raspberry pi",
-    url = "http://github.com/Harper",   # project home page, if any
+    url = "http://github.com/salesiopark/Ardpy",   # project home page, if any
 
     # could also include long_description, download_url, classifiers, etc.
-    classifiers = ['Programming Language :: Python :: 3'],
+    classifiers = ['Programming Language :: Python :: 3.4'],
 )

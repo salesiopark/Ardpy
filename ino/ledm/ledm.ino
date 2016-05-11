@@ -1,5 +1,5 @@
-#include <Wire.h> // must be included befor Pyard.h
-#include <Pyard.h>
+#include <Wire.h> // must be included befor Ardpy.h
+#include <Ardpy.h>
 
 #define X0 A0
 #define X1 A1
@@ -26,14 +26,14 @@ volatile byte mat[7][5] = {
 };
 
 void ledon() {  //pinMode(pin, mode=0(input)/1(output)/2(input_pullup)
-    byte x = Pyard.get_byte();
-    byte y = Pyard.get_byte(1);
+    byte x = Ardpy.get_byte();
+    byte y = Ardpy.get_byte(1);
 	mat[y][x] = HIGH;
 }
 
 void ledoff() {  //pinMode(pin, mode=0(input)/1(output)/2(input_pullup)
-    byte x = Pyard.get_byte();
-    byte y = Pyard.get_byte(1);
+    byte x = Ardpy.get_byte();
+    byte y = Ardpy.get_byte(1);
 	mat[y][x] = LOW;
 }
 
@@ -46,8 +46,8 @@ void clear() {
 void setall(){
     byte ax[5]; // array of x's
 
-    uint32_t x03 = Pyard.get_uint32();
-    ax[4] = Pyard.get_byte(1);
+    uint32_t x03 = Ardpy.get_uint32();
+    ax[4] = Ardpy.get_byte(1);
     
     ax[0] = (byte)x03;
     ax[1] = (byte)(x03>>8);
@@ -84,12 +84,12 @@ void setup() {
 ////////////////////////////////////////////////
     pinMode(13, OUTPUT);
 
-	Pyard.add_func(ledon);// _exec_func(0)
-	Pyard.add_func(ledoff);// _exec_func(1)
-    Pyard.add_func(clear);// _exec_func(2)
-    Pyard.add_func(setall);// _exec_func(3)
+	Ardpy.add_func(ledon);// _exec_func(0)
+	Ardpy.add_func(ledoff);// _exec_func(1)
+    Ardpy.add_func(clear);// _exec_func(2)
+    Ardpy.add_func(setall);// _exec_func(3)
 
-	Pyard.begin(0x10, 1);
+	Ardpy.begin(0x10, 1);
 }
 
 

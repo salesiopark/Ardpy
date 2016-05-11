@@ -1,7 +1,7 @@
-from . import Pyard
+from . import Ardpy
 #import time
 
-class Ledm(Pyard):
+class Ledm(Ardpy):
     #__DELAYTM = 0.001
     import struct as __struct
     __table = {

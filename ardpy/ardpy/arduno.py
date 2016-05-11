@@ -1,6 +1,6 @@
-from . import Pyard
+from . import Ardpy
 
-class Arduno(Pyard):
+class Arduno(Ardpy):
     INPUT           = 0
     OUTPUT          = 1
     INPUT_PULLUP    = 2

@@ -5,7 +5,7 @@
 * <Wire.h> must be included before including <Pyard.h> in user .ino file
 ************************************************************************/
 
-#include "Pyard.h"
+#include "Ardpy.h"
 #include "Wire.h"
 #include <avr/eeprom.h>
 
@@ -389,4 +389,4 @@ void _HRP_::_onRequest() {
 	} 
 }
 
-_HRP_ Pyard;
+_HRP_   Ardpy;

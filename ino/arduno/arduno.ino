@@ -1,42 +1,42 @@
 #include <Wire.h>
-#include <Pyard.h>
+#include <Ardpy.h>
 
 void set_mode() {  //pinMode(pin, mode=0(input)/1(output)/2(input_pullup)
-	byte pin = Pyard.get_byte();
-	byte mode = Pyard.get_byte(1);
+	byte pin = Ardpy.get_byte();
+	byte mode = Ardpy.get_byte(1);
 	pinMode(pin, mode);
 }
 //*/
 
 void set_digital() {  //digitalWrite(pin, val)
-	byte pin = Pyard.get_byte();
-	byte val = Pyard.get_byte(1);
+	byte pin = Ardpy.get_byte();
+	byte val = Ardpy.get_byte(1);
     digitalWrite(pin, val);
 }
 
 void get_digital() { // digitalRead(pin, pullup = false)
-	byte pin = Pyard.get_byte();
-    Pyard.set_ret( (byte) digitalRead(pin) );
+	byte pin = Ardpy.get_byte();
+    Ardpy.set_ret( (byte) digitalRead(pin) );
 }
 
 void get_analog() { // analogRead()
-	byte pin = Pyard.get_byte();
-	Pyard.set_ret( (uint16_t)analogRead(pin) );
+	byte pin = Ardpy.get_byte();
+	Ardpy.set_ret( (uint16_t)analogRead(pin) );
 }
 
 void set_pwm() { //analogWrite()
-	byte pin = Pyard.get_byte();
-	byte val = Pyard.get_byte(1);
+	byte pin = Ardpy.get_byte();
+	byte val = Ardpy.get_byte(1);
 	analogWrite(pin, val);
 }
 
 void setup() {
-	Pyard.add_func( set_mode ); //0
-	Pyard.add_func( set_digital ); //1
-	Pyard.add_func( get_digital ); //2
-	Pyard.add_func( get_analog );  //3
-	Pyard.add_func( set_pwm ); //4
-	Pyard.begin(0x10, 0);
+	Ardpy.add_func( set_mode ); //0
+	Ardpy.add_func( set_digital ); //1
+	Ardpy.add_func( get_digital ); //2
+	Ardpy.add_func( get_analog );  //3
+	Ardpy.add_func( set_pwm ); //4
+	Ardpy.begin(0x10, 0);
 }
 
 void loop() {
@@ -128,8 +128,8 @@ uint8_t bitM[20] = {0,1,2,3,4,5,6,7, 0,1,2,3,4,5, 0,1,2,3,4,5};
 
 
 void set_digital() {  //digitalWrite(pin, val)
-	byte pin = Pyard.get_byte();
-	byte val = Pyard.get_byte(1);
+	byte pin = Ardpy.get_byte();
+	byte val = Ardpy.get_byte(1);
     digitalWrite(pin, val);
 
     // set DDR?.pin (to OUTPUT mode)
@@ -141,8 +141,8 @@ void set_digital() {  //digitalWrite(pin, val)
 }
 
 void get_digital() { // digitalRead(pin, pullup = false)
-	byte pin = Pyard.get_byte();
-    Pyard.set_ret( (byte) digitalRead(pin) );
+	byte pin = Ardpy.get_byte();
+    Ardpy.set_ret( (byte) digitalRead(pin) );
 
     
     // reset DDR?.pin (to INPUT mode)
@@ -150,15 +150,15 @@ void get_digital() { // digitalRead(pin, pullup = false)
     cbi( ddrM[pin], bitM[pin] );
     // change PORT?.pin as val
     if ( bit_is_set(pinM[pin], bitM[pin]) ) {
-    	Pyard.set_ret((byte)1);
+    	Ardpy.set_ret((byte)1);
     } else {
-    	Pyard.set_ret((byte)0);
+    	Ardpy.set_ret((byte)0);
     }
     
 }
 /*
 void dreadpu() { // digitalRead(pin, pullup = false)
-	byte pin = Pyard.get_byte();
+	byte pin = Ardpy.get_byte();
 
     // reset DDR?.pin (to INPUT mode)
     // thus, there is no need to call pinMode() before
@@ -167,9 +167,9 @@ void dreadpu() { // digitalRead(pin, pullup = false)
 
     // read PIN? register
     if ( bit_is_set(pinM[pin], bitM[pin]) ) {
-    	Pyard.set_ret((byte)1);
+    	Ardpy.set_ret((byte)1);
     } else {
-    	Pyard.set_ret((byte)0);
+    	Ardpy.set_ret((byte)0);
     }
 }
 */

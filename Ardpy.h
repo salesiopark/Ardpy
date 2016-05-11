@@ -4,8 +4,8 @@
 * developed by salesioPark (박장현, 국립목포대학교, 전기제어공학과)
 * Note: <Wire.h> must be included before including <Harper.h>
 ************************************************************************/
-#ifndef __Pyard_h__
-#define __Pyard_h__
+#ifndef __ARDPY_H__
+#define __ARDPY_H__
 
 #include "Arduino.h"
 
@@ -206,6 +206,6 @@ class _HRP_ {
 }; // closing of *class _HRP_*
 
 // define externally used object name as Harper
-extern _HRP_ Pyard;
+extern _HRP_    Ardpy;
 
 #endif
