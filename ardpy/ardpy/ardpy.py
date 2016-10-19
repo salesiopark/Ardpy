@@ -155,53 +155,6 @@ class Ardpy:
         else:
             raise Exception('Unknown arg type.')
 
-    '''
-    def _send_int8(self, val, index = 0):
-        lst_data = list(Pyard.__struct.pack('b', val))
-        self.__reg_arg(index, self.DT_SBYTE, lst_data)
-
-    def _send_uint8(self, val, index = 0):
-        lst_data = list(Pyard.__struct.pack('B', val)) 
-        self.__reg_arg(index, self.DT_BYTE, lst_data)
-
-    def _send_byte(self, val, index = 0):
-        lst_data = list(Pyard.__struct.pack('B', val)) 
-        self.__reg_arg(index, self.DT_BYTE, lst_data)
-
-    def _send_int16(self, val, index = 0):
-        lst_data =  list(Pyard.__struct.pack('h', val)) 
-        self.__reg_arg(index, self.DT_SHORT, lst_data)
-
-    def _send_int(self, val, index = 0):
-        lst_data =  list(Pyard.__struct.pack('h', val)) 
-        self.__reg_arg(index, self.DT_SHORT, lst_data)
-
-    def _send_uint16(self, val, index = 0):
-        lst_data = list(Pyard.__struct.pack('H', val))
-        self.__reg_arg(index, self.DT_USHORT, lst_data)
-
-    def _send_int32(self, val, index = 0):
-        lst_data =  list(Pyard.__struct.pack('l', val))
-        self.__reg_arg(index, self.DT_LONG, lst_data)
-
-    def _send_uint32(self, val, index = 0):
-        lst_data =  list(Pyard.__struct.pack('L', val))
-        self.__reg_arg(index, self.DT_ULONG, lst_data)
-
-    def _send_float(self, fval, index = 0):
-        lst_data =  list(Pyard.__struct.pack('f', fval)) 
-        self.__reg_arg(index, self.DT_FLOAT, lst_data)
-
-    def _send_str(self, string, index = 0):
-        """
-        Transmit string to the pyard (arduino) device.
-        Up to 27 ASCII characters can be transmitted.
-        """
-        lst_data = list( string.encode('utf-8') ) 
-        lst_data.append(0) # append null character in the end
-        self.__reg_arg(index, self.DT_STR, lst_data)
-    '''
-
     """====================================================================
         아두이노의 함수를 실행하는 메서드
         인자들 전송 -> 함수 실행 명령 전송 -> 함수 실행 종료 대기 -> 리턴값 반환

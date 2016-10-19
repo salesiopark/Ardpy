@@ -21,13 +21,19 @@ class Ledm(Ardpy):
     def __init__(self, addr, port = 1):
         super().__init__(addr, port = port)
 
-    def on(self, x, y):
+    def on(self, index):
+        self.on_xy(index%5, index//5)
+
+    def off(self, index):
+        self.off_xy(index%5, index//5)
+
+    def on_xy(self, x, y):
         self._set_arg(x)
         self._set_arg(y, 1)
         self._exec_func(0)
         #time.sleep(self.__DELAYTM)
 
-    def off(self, x, y):
+    def off_xy(self, x, y):
         self._set_arg(x)
         self._set_arg(y, 1)
         self._exec_func(1)
