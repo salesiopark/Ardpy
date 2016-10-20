@@ -219,19 +219,18 @@ void _HRP_:: _reset_all_args() {
 // i2c로 지령(cmd)를 넘겨받은 직후 실행되는 함수.
 // 모든 명령을 처리한 후 정상/에러발생 여부를 저장한다.
 void _HRP_:: check() {
-	//if  ( _stat == _STAT_UNDER_NORMAL_PROC ) { 
-		byte index; // 이것 대신 _idx를 사용하면 안됨
-		_cmd = _rcvBuf[0]; //ISR에서 사용되는 변수가 아님
+    byte index; // 이것 대신 _idx를 사용하면 안됨
+    _cmd = _rcvBuf[0]; //ISR에서 사용되는 변수가 아님
 
-		switch (_cmd) { 
+    switch (_cmd) { 
 
-			case _CMD_CHANGE_ADDR: // rcvBuf:[cmd, addr]
-				eeprom_update_byte( (uint8_t *)__EEPROM_ADDR__, _rcvBuf[1]); 					
-				_stat = STAT_CMD_COMPLETED;
-				return;
-                //break;
+        case _CMD_CHANGE_ADDR: // rcvBuf:[cmd, addr]
+            eeprom_update_byte( (uint8_t *)__EEPROM_ADDR__, _rcvBuf[1]); 					
+            _stat = STAT_CMD_COMPLETED;
+            return;
+            //break;
 
-        	case _CMD_EXEC_FUNC: // revBuf:[cmd, func_index]
+        case _CMD_EXEC_FUNC: // revBuf:[cmd, func_index]
 	 			index = _rcvBuf[1]; // index of func to execute
 				_u_ret.s_ret.type = _DTYPE_NONE; //반환값을 먼저 NONE으로 리셋
 				_funcArr[index](); //<= 이 안에서 오류가 발생할 수 있다.
@@ -244,7 +243,7 @@ void _HRP_:: check() {
 				return;
     			//break;
  
-            case _CMD_SEND_DATA : // rcvBuf:[cmd, index, dtype, data0, data1,...]
+        case _CMD_SEND_DATA : // rcvBuf:[cmd, index, dtype, data0, data1,...]
                 index = _rcvBuf[1];
 				switch (_rcvBuf[2]) {  // dtype
 
@@ -314,16 +313,13 @@ void _HRP_:: check() {
 				return;
                 //break;
 
-			default:
+        default:
 				_u_ret.s_ret.info = _cmd;
 				_stat = _STAT_ERR_DATA_102;
 				return;
 				//break;
-		} // switch (_cmd)
-		_stat = STAT_CMD_COMPLETED;
-		return;
-	
-	//} // if  ( _stat == _STAT_UNDER_NORMAL_PROC ) { 
+	} // switch (_cmd)
+	_stat = STAT_CMD_COMPLETED;
 }
 
 /* --------------------------------------------------------------
