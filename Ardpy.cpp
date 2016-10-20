@@ -1,5 +1,5 @@
 /***********************************************************************
-* Pyard.h ver 1.0
+* Ardpy.h ver 1.0
 * Arduino library for i2c (slave) communication with Raspberry pi.
 * by salesiopark(박장현, 국립목포대학교, 전기제어공학과)
 * <Wire.h> must be included before including <Ardpy.h> in user .ino file
@@ -219,7 +219,7 @@ void _HRP_:: _reset_all_args() {
 // i2c로 지령(cmd)를 넘겨받은 직후 실행되는 함수.
 // 모든 명령을 처리한 후 정상/에러발생 여부를 저장한다.
 void _HRP_:: check() {
-	if  ( _stat == _STAT_UNDER_NORMAL_PROC ) { 
+	//if  ( _stat == _STAT_UNDER_NORMAL_PROC ) { 
 		byte index; // 이것 대신 _idx를 사용하면 안됨
 		_cmd = _rcvBuf[0]; //ISR에서 사용되는 변수가 아님
 
@@ -228,30 +228,24 @@ void _HRP_:: check() {
 			case _CMD_CHANGE_ADDR: // rcvBuf:[cmd, addr]
 				eeprom_update_byte( (uint8_t *)__EEPROM_ADDR__, _rcvBuf[1]); 					
 				_stat = STAT_CMD_COMPLETED;
-				return;//break;
+				return;
+                //break;
 
         	case _CMD_EXEC_FUNC: // revBuf:[cmd, func_index]
 	 			index = _rcvBuf[1]; // index of func to execute
-				//if (index < _num_funcs ) { // 파이썬에서 처리함
-					_u_ret.s_ret.type = _DTYPE_NONE; //반환값을 먼저 NONE으로 리셋
-					_funcArr[index](); //<= 이 안에서 오류가 발생할 수 있다.
-					_reset_all_args(); // 모든 인자를 NONE으로 리셋한다.
-					if (_stat == _STAT_UNDER_NORMAL_PROC ) {					
-						_stat = STAT_CMD_COMPLETED;
-					} else { // some error in input args occurs
-						_u_ret.byArr[RET_BYTE0] = index; //function index
-					}
-					return;
-				//} else {
-				//	_stat = _STAT_ERR_FUNC_INDEX;
-				//	return;
-				// }
-    			break;
+				_u_ret.s_ret.type = _DTYPE_NONE; //반환값을 먼저 NONE으로 리셋
+				_funcArr[index](); //<= 이 안에서 오류가 발생할 수 있다.
+				_reset_all_args(); // 모든 인자를 NONE으로 리셋한다.
+				if (_stat == _STAT_UNDER_NORMAL_PROC ) {					
+					_stat = STAT_CMD_COMPLETED;
+				} else { // some error in input args occurs
+					_u_ret.byArr[RET_BYTE0] = index; //function index
+				}
+				return;
+    			//break;
  
-		case _CMD_SEND_DATA : // rcvBuf:[cmd, index, dtype, data0, data1,...]
-		   index = _rcvBuf[1];
-			//if ( index < _max_arg_num ) { // 인덱스는 pythone에서 체크한다.
-
+            case _CMD_SEND_DATA : // rcvBuf:[cmd, index, dtype, data0, data1,...]
+                index = _rcvBuf[1];
 				switch (_rcvBuf[2]) {  // dtype
 
 					case _DTYPE_INT8:	
@@ -312,28 +306,24 @@ void _HRP_:: check() {
 					default:
 						_stat = _STAT_ERR_DATA_101;
 						return;
-						break;
+						//break;
 
-					} //  switch (_rcvBuf[2])
-					_u_ret.s_ret.info = index; // store index to info byte
-					_stat = STAT_CMD_COMPLETED;
-					return;
-				//}  else { // if (index < _MAX_ARG_NUM__)
-				//	_stat= _STAT_ERR_ARG_INDEX;
-				//	return;
-				//}
-				break;
+                } //  switch (_rcvBuf[2])
+				_u_ret.s_ret.info = index; // store index to info byte
+				_stat = STAT_CMD_COMPLETED;
+				return;
+                //break;
 
 			default:
 				_u_ret.s_ret.info = _cmd;
 				_stat = _STAT_ERR_DATA_102;
 				return;
-				break;
+				//break;
 		} // switch (_cmd)
 		_stat = STAT_CMD_COMPLETED;
 		return;
 	
-	} // if  (! _stat == _STAT_UNDER_NORMAL_PROC ) { 
+	//} // if  ( _stat == _STAT_UNDER_NORMAL_PROC ) { 
 }
 
 /* --------------------------------------------------------------
@@ -345,8 +335,10 @@ _onRequest()함수도 호출된다.
 --------------------------------------------------------------*/
 void _HRP_::_onReceive(int count) { //static function
     _cmd_i2c = Wire.read(); // first byte is ALWAYS command
+    //만약 smbus.read_i2c_block_data()호출이라면 여기서 종료되고
+    //바로 _onRequest() 함수가 호출된다.
     if (count > 1) {
-        _len_just_rcvd = (byte)count-1;//cmd는 제외된(데이터만)길이
+        _len_just_rcvd = (byte)count - 1;//cmd는 제외된(데이터만)길이
         _idx = 0;
         while( Wire.available() )
             _rcvBuf[_idx++] = Wire.read();
@@ -392,4 +384,4 @@ void _HRP_::_onRequest() {
 	} 
 }
 
-_HRP_   Ardpy;
+_HRP_   Ardpy;//외부에서 사용할 객체를 생성한다.

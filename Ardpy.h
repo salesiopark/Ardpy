@@ -128,33 +128,32 @@ class _HRP_ {
 		};
 
 		union _U_Data {
-			volatile int8_t		sbVal;
-			volatile uint8_t		ucVal;
-			volatile _U_Short		u_s;
-			volatile _U_UShort	u_us;
-			volatile _U_Long		u_l;
-			volatile _U_ULong		u_ul;
-			volatile _U_Float		u_f;
-			char*			str;
+            volatile int8_t     sbVal;
+            volatile uint8_t    ucVal;
+            volatile _U_Short   u_s;
+            volatile _U_UShort  u_us;
+            volatile _U_Long    u_l;
+            volatile _U_ULong   u_ul;
+            volatile _U_Float   u_f;
+            char*               str;
 		};
 
 		struct _S_Arg { // structure for function argument
-			volatile byte			type;
-			volatile _U_Data		dat;
+            volatile byte       type;
+            volatile _U_Data    dat;
 		};
 
 		// data structures for the return data to the master ---------
 		struct _S_Ret {
-			//volatile byte			stat;
 			volatile byte			type;
 			volatile _U_Data		dat;
 			volatile byte 			info;
 			volatile byte			checksum;
 		};
 
-		union _U_Ret {
-			volatile _S_Ret		s_ret;
-			volatile byte				byArr [ __RET_DATA_LENGTH__ ];
+        union _U_Ret {
+            volatile _S_Ret         s_ret;
+            volatile byte           byArr [ __RET_DATA_LENGTH__ ];
 		};
 
 		// data structure for the device id (ulong) -------------------
@@ -173,12 +172,17 @@ class _HRP_ {
 			byte 		byArr[7];
 		};
 
+        static void             _onRequest();
+        static void             _onReceive(int);
+        static void             _reset_all_args();
+		static void _check_if_no_err_to_get_arg(byte, byte);
+
         volatile static byte    _stat;
         volatile static byte    _statArr[2];
         volatile static byte    _cmd; // command from master device
         volatile static byte    _cmd_i2c; // command from master device
         volatile static byte    _rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ];
-		volatile static byte _len_just_rcvd;// = 0;
+		volatile static byte    _len_just_rcvd;// = 0;
 
         static pfunc_t*         _tmpFuncArr;
         static pfunc_t*         _funcArr; //__funcs_i2c__;
@@ -186,23 +190,16 @@ class _HRP_ {
 
         static _U_Id            _u_id;
 
-		static void _onRequest();
-		static void _onReceive(int);
-
         volatile static _U_Ret  _u_ret; // union for ret value
         volatile static _S_Arg* _args;  // struct for function args
 
         static char             _strBuf[ __STR_BUF_LENGTH__ ];
-        static void             _reset_all_args();
+
+		static byte _max_arg_num;
 
 		//tmp varialbes
 		static byte _checksum;
 		static byte _idx;
-
-		static void _check_if_no_err_to_get_arg(byte, byte);
-
-		static byte _max_arg_num;
-
 }; // closing of *class _HRP_*
 
 // define externally used object name as Harper
