@@ -178,6 +178,7 @@ class _HRP_ {
         volatile static byte    _cmd; // command from master device
         volatile static byte    _cmd_i2c; // command from master device
         volatile static byte    _rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ];
+		volatile static byte _len_just_rcvd;// = 0;
 
         static pfunc_t*         _tmpFuncArr;
         static pfunc_t*         _funcArr; //__funcs_i2c__;
@@ -201,7 +202,6 @@ class _HRP_ {
 		static void _check_if_no_err_to_get_arg(byte, byte);
 
 		static byte _max_arg_num;
-		volatile static byte _len_just_rcvd;// = 0;
 
 }; // closing of *class _HRP_*
 

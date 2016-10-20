@@ -12,7 +12,7 @@ class Ardpy:
     # InDeX of ret data
     __IDX_RET_TYPE		= 0 # index of received data list
     __IDX_RET_DATA_STRT	= 1 # index of received data list
-    __IDX_RET_INFO 		= 5
+    __IDX_RET_INFO 		= 5 # index of received data list
  
 	# Data Types
     __DT_NONE   = 0
@@ -45,8 +45,9 @@ class Ardpy:
         self.__i2c = self.__smbus.SMBus(port)
         self.__read_id_info()
         self.__reset_args()
-        print('Ardpy device (addr:0x%x, id:%d) ready.'%(addr,self.__id))
-        print('number of funcs is %d and max number of args is %d.'%(self.__num_funcs, self.__max_arg_num))
+        print('Ardpy device (addr:0x%x, id:%d) ready.'%(addr, self.__id))
+        print('Number of functions : %d'%self.__num_funcs)
+        print('Maximum number of function arguments : %d'%self.__max_arg_num)
 
         '''
         #04/May/2016 create funcNN as many as in Arduino
@@ -178,7 +179,9 @@ class Ardpy:
             obj._set_arg(byte_val1, index = 1)
             obj._exec_func(0)
 
-        As shown in these examples, input arguments are must be set before call _exec_func() method.
+        As shown in these examples,
+        input arguments are must be set
+        before calling _exec_func() method.
         """
         if index >= self.__num_funcs:
             raise Exception('Index of func out of bound (dev:0x%x)'%self.__addr)
@@ -346,6 +349,7 @@ class Ardpy:
 
     """====================================================================
         lst_bytes 리스트의 요소들로 부터 체크섬을 계산하는 함수
+        cmd 까지 고려해서 체크섬을 계산한다.
        ====================================================================
     """
 

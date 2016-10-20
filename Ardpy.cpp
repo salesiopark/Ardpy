@@ -2,7 +2,7 @@
 * Pyard.h ver 1.0
 * Arduino library for i2c (slave) communication with Raspberry pi.
 * by salesiopark(박장현, 국립목포대학교, 전기제어공학과)
-* <Wire.h> must be included before including <Pyard.h> in user .ino file
+* <Wire.h> must be included before including <Ardpy.h> in user .ino file
 ************************************************************************/
 
 #include "Ardpy.h"
@@ -336,21 +336,24 @@ void _HRP_:: check() {
 	} // if  (! _stat == _STAT_UNDER_NORMAL_PROC ) { 
 }
 
-// i2c ISR functions ----------------------------------------------------------------------
+/* --------------------------------------------------------------
+i2c ISR functions 
+smbus.write_i2c_block_data()가 수행되면 _onReceive()함수만 호출된다.
 
+smbus.read_i2c_block_data()가 수행되면 _onReceive()함수가 호출된 후
+_onRequest()함수도 호출된다.
+--------------------------------------------------------------*/
 void _HRP_::_onReceive(int count) { //static function
-	_cmd_i2c = Wire.read(); // first byte is ALWAYS command
-	if (count > 1) {
-		_len_just_rcvd = (byte)count-1;
-
-		_idx = 0;
-		while( Wire.available() )
-			_rcvBuf[_idx++] = Wire.read();
-	} //if (count>1)
+    _cmd_i2c = Wire.read(); // first byte is ALWAYS command
+    if (count > 1) {
+        _len_just_rcvd = (byte)count-1;//cmd는 제외된(데이터만)길이
+        _idx = 0;
+        while( Wire.available() )
+            _rcvBuf[_idx++] = Wire.read();
+    } //if (count>1)
 }
 
 void _HRP_::_onRequest() {
-
 	switch(_cmd_i2c) {
 
 		case _CMD_SEND_BACK:
