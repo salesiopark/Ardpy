@@ -245,7 +245,7 @@ void _HRP_:: check() {
 				return;
     			//break;
  
-        case _CMD_SEND_DATA : // rcvBuf:[cmd, index, dtype, data0, data1,...]
+        case _CMD_SEND_ARG : // rcvBuf:[cmd, index, dtype, data0, data1,...]
                 index = _rcvBuf[1];
 				switch (_rcvBuf[2]) {  // dtype
 
@@ -305,15 +305,16 @@ void _HRP_:: check() {
 						break;
 
 					default:
+                        _u_ret.s_ret.info = index;
 						_stat = _STAT_ERR_DATA_101;
 						return;
 						//break;
 
                 } //  switch (_rcvBuf[2])
-				_u_ret.s_ret.info = index; // store index to info byte
-                break;
-				//_stat = STAT_CMD_COMPLETED;
-				//return;
+				//_u_ret.s_ret.info = index; // store index to info byte
+                //break;
+				_stat = STAT_CMD_COMPLETED;
+				return;
 
         default:
 				_u_ret.s_ret.info = _cmd;
@@ -334,7 +335,9 @@ _onRequest()함수도 호출된다.
 void _HRP_::_onReceive(int count) { //static function
     // _cmd를 _rcvBuf[0]와 중복 저장하는 이유가 있다.
     // 이후에 _CMD_SEND_BACK 요구에 의해서 _cmd_i2c가 변경되기 때문이다.
+    
     _cmd_i2c = Wire.read(); // 첫 바이트는 *항상* command
+    
     //만약 smbus.read_i2c_block_data()호출이라면 여기서 종료되고
     //바로 _onRequest() 함수가 호출된다.
     if (count > 1) {
@@ -381,6 +384,10 @@ void _HRP_::_onRequest() {
 			Wire.write( (const byte*)_u_id.byArr, 7);
 			break;
 			
+        // 21/Oct/2016 추가 ret데이터도 원본비교
+        case _CMD_CHECK_RET:
+            break;
+            
 		default:
 			Wire.write(255);
 			break;

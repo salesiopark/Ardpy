@@ -80,11 +80,13 @@ class _HRP_ {
             _CMD_READ_DATA      = 0,
             _CMD_READ_ID        = 1, //<- //#define CMD_IS_READY					2
             _CMD_CHANGE_ADDR    = 2,
-            _CMD_SEND_DATA      = 3,
+            _CMD_SEND_ARG       = 3,
             _CMD_EXEC_FUNC      = 4,
             _CMD_READ_STAT      = 5,
             _CMD_CHECK_OK       = 6, //_CMD_READ_STAT_WRITE	= 6,
             _CMD_SEND_BACK      = 7,
+            
+            _CMD_CHECK_RET      = 10,
 		};
 
 		enum _E_RET_DATA_IDX { //byte index of data in _u_ret

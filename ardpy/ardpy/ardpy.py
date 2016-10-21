@@ -3,11 +3,13 @@ class Ardpy:
     __CMD_READ_DATA   = 0
     __CMD_READ_ID     = 1
     __CMD_CHANGE_ADDR = 2
-    __CMD_SEND_DATA   = 3
+    __CMD_SEND_ARG    = 3
     __CMD_EXEC_FUNC   = 4
     __CMD_READ_STAT   = 5
     __CMD_CHECK_OK    = 6 #CMD_READ_STAT_WRITE	= 6
     __CMD_SEND_BACK   = 7
+    
+    __CMD_CHECK_RET   =10 # 21/OCT/2016 추가
 
     # InDeX of ret data
     __IDX_RET_TYPE		= 0 # index of received data list
@@ -95,7 +97,7 @@ class Ardpy:
 
     """====================================================================
         슬레이브에 보낼 데이터 패킷을 구성한 후 __lst_args 리스트에 저장하는 함수들
-        패킷 구성: [__CMD_SEND_DATA, arg_index, data_type, data0, data1, ... ]    
+        패킷 구성: [__CMD_SEND_ARG, arg_index, data_type, data0, data1, ... ]    
         실제로 보내는 것은 *함수를 실행하는 시점*에서 한다.
         이렇게 한 이유는 만약 함수를 실행하는 시점에서 오류가 발생한다면
         처음부터(즉, 인자를 보내는 것 부터) 다시 수행할 수 있도록 하기 위함이다.
@@ -104,7 +106,7 @@ class Ardpy:
     def __reg_arg(self, index, dtype, lst_data):
         if index >= self.__max_arg_num:
             raise Exception('Arg index must be under %d.'%self.__max_arg_num)
-        lst_pckt = [self.__CMD_SEND_DATA, index, dtype] 
+        lst_pckt = [self.__CMD_SEND_ARG, index, dtype] 
         lst_pckt.extend(lst_data)
         self.__lst_args[index] = lst_pckt
         #print('lst_pckt:%s'%lst_pckt)
@@ -268,7 +270,7 @@ class Ardpy:
             if arg_pckt != None:
                 SuccessToSendArg = False
                 while not SuccessToSendArg :
-                    self.__write_i2c_cmd(self.__CMD_SEND_DATA, arg_pckt)
+                    self.__write_i2c_cmd(self.__CMD_SEND_ARG, arg_pckt)
                     stat = self.__wait_until_cmd_handled()
                     if stat == self.__STAT_CMD_COMPLETED:
                         SuccessToSendArg = True
