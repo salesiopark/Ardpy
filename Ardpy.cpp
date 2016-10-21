@@ -99,11 +99,11 @@ byte _HRP_::begin(byte addr, uint32_t dev_id) {
 	_u_id.s_id.numArgs = _max_arg_num;
 	_u_id.s_id.numFuncs = _num_funcs;
 	
-    // calc checksum
-	_u_id.s_id.checksum = 0xff - (byte)(_CMD_READ_ID
-			+ _u_id.byArr[0] + _u_id.byArr[1] + _u_id.byArr[2] + _u_id.byArr[3]
-			+ _u_id.byArr[4]
-			+ _u_id.byArr[5] + _u_id.byArr[6]);
+    // 체크썸(_u_id.byArr[6])을 계산 
+    _u_id.s_id.checksum = 0xff - (byte)( _CMD_READ_ID
+        + _u_id.byArr[0] + _u_id.byArr[1] + _u_id.byArr[2] + _u_id.byArr[3]
+        + _u_id.byArr[4]
+        + _u_id.byArr[5]);
 
 	// if addr in EEPROM is valid, use that.
 	byte addr_real = addr;
@@ -332,19 +332,23 @@ smbus.read_i2c_block_data()가 수행되면 _onReceive()함수가 호출된 후
 _onRequest()함수도 호출된다.
 --------------------------------------------------------------*/
 void _HRP_::_onReceive(int count) { //static function
-    _cmd_i2c = Wire.read(); // first byte is ALWAYS command
+    // _cmd를 _rcvBuf[0]와 중복 저장하는 이유가 있다.
+    // 이후에 _CMD_SEND_BACK 요구에 의해서 _cmd_i2c가 변경되기 때문이다.
+    _cmd_i2c = Wire.read(); // 첫 바이트는 *항상* command
     //만약 smbus.read_i2c_block_data()호출이라면 여기서 종료되고
     //바로 _onRequest() 함수가 호출된다.
     if (count > 1) {
-        _len_just_rcvd = (byte)count - 1;//cmd는 제외된(데이터만)길이
+        //_len_just_rcvd = (byte)count - 1;//cmd는 제외된(데이터만)길이
         _idx = 0;
-        while( Wire.available() )
+        while( Wire.available() ) {
             _rcvBuf[_idx++] = Wire.read();
+        }
+        _len_just_rcvd = _idx;
     } //if (count>1)
 }
 
-void _HRP_::_onRequest() {
-	switch(_cmd_i2c) {
+void _HRP_::_onRequest() { 
+    switch(_cmd_i2c) { // switch(_rcvBuf[0]) { // command
 
 		case _CMD_SEND_BACK:
 			Wire.write( (const byte*)_rcvBuf, _len_just_rcvd);
@@ -353,14 +357,14 @@ void _HRP_::_onRequest() {
 		case _CMD_CHECK_OK:
 			_stat = _STAT_UNDER_NORMAL_PROC;
 			_statArr[0] = _stat;
-			_statArr[1]	=	0xff-(_CMD_CHECK_OK + _stat);
+			_statArr[1]	= 0xff-(_CMD_CHECK_OK + _stat); //checksum
 			Wire.write( (const byte*)_statArr, 2);
             check();//<- place here instead of in loop() function ***
 			break;
 
 		case _CMD_READ_STAT:
 			_statArr[0] = _stat;
-			_statArr[1]	=	0xff-(_CMD_READ_STAT + _stat);
+			_statArr[1]	= 0xff - (_CMD_READ_STAT + _stat);//checksum
 			Wire.write( (const byte*)_statArr, 2);
 			break;
 
