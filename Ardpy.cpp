@@ -26,7 +26,7 @@ byte                    _HRP_::_max_arg_num = __INIT_MAX_ARG_NUM__;
 pfunc_t*                _HRP_::_tmpFuncArr = NULL;
 byte                    _HRP_::_num_funcs = 0;
 pfunc_t*                _HRP_::_funcArr = NULL;
-volatile byte           _HRP_::_len_just_rcvd = 0;
+//volatile byte           _HRP_::_len_just_rcvd = 0;
 
 // ---------
 void _HRP_::set_max_arg_num(byte num) {
@@ -343,7 +343,7 @@ void _HRP_::_onReceive(int count) { //static function
         while( Wire.available() ) {
             _rcvBuf[_idx++] = Wire.read();
         }
-        _len_just_rcvd = _idx;
+        //_len_just_rcvd = _idx;
     } //if (count>1)
 }
 
@@ -351,7 +351,9 @@ void _HRP_::_onRequest() {
     switch(_cmd_i2c) { // switch(_rcvBuf[0]) { // command
 
 		case _CMD_SEND_BACK:
-			Wire.write( (const byte*)_rcvBuf, _len_just_rcvd);
+			//Wire.write( (const byte*)_rcvBuf, _len_just_rcvd);
+            // _idx는 직전 데이터의 길이가 기록되어 있다.
+			Wire.write( (const byte*)_rcvBuf, _idx);
 			break;
 
 		case _CMD_CHECK_OK:
