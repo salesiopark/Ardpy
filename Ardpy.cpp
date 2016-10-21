@@ -338,7 +338,6 @@ void _HRP_::_onReceive(int count) { //static function
     //만약 smbus.read_i2c_block_data()호출이라면 여기서 종료되고
     //바로 _onRequest() 함수가 호출된다.
     if (count > 1) {
-        //_len_just_rcvd = (byte)count - 1;//cmd는 제외된(데이터만)길이
         _idx = 0;
         while( Wire.available() ) {
             _rcvBuf[_idx++] = Wire.read();
@@ -350,11 +349,11 @@ void _HRP_::_onReceive(int count) { //static function
 void _HRP_::_onRequest() { 
     switch(_cmd_i2c) { // switch(_rcvBuf[0]) { // command
 
-		case _CMD_SEND_BACK:
-			//Wire.write( (const byte*)_rcvBuf, _len_just_rcvd);
+        case _CMD_SEND_BACK:
+            //Wire.write( (const byte*)_rcvBuf, _len_just_rcvd);
             // _idx는 직전 데이터의 길이가 기록되어 있다.
-			Wire.write( (const byte*)_rcvBuf, _idx);
-			break;
+            Wire.write( (const byte*)_rcvBuf, _idx);
+            break;
 
 		case _CMD_CHECK_OK:
 			_stat = _STAT_UNDER_NORMAL_PROC;
