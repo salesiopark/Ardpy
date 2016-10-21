@@ -140,7 +140,7 @@ void _HRP_::add_func( void (*func)(void) ){
 	_funcArr = _tmpFuncArr;
 }
 
-// get_data() methods definition -----------------------------------
+// get_data(index, dtype) methods definition -----------------------------------
 // 정확한 데이터형의 인자가 저장되어있는 지를 먼저 체크한다.
 // 만약 그렇지 않다면 _u_ret.s_ret.info 에 인자의 인덱스를 저장하고
 // stat에 에러 코드를 저장한다.
@@ -226,18 +226,20 @@ void _HRP_:: check() {
 
         case _CMD_CHANGE_ADDR: // rcvBuf:[cmd, addr]
             eeprom_update_byte( (uint8_t *)__EEPROM_ADDR__, _rcvBuf[1]); 					
+            //break;보다 아래와 같이 직접 하면 실행을 단축할 것 같다.
             _stat = STAT_CMD_COMPLETED;
             return;
-            //break;
 
         case _CMD_EXEC_FUNC: // revBuf:[cmd, func_index]
 	 			index = _rcvBuf[1]; // index of func to execute
 				_u_ret.s_ret.type = _DTYPE_NONE; //반환값을 먼저 NONE으로 리셋
 				_funcArr[index](); //<= 이 안에서 오류가 발생할 수 있다.
+                                   // 왜냐면 인자를 check하는 루틴을 거치므로
 				_reset_all_args(); // 모든 인자를 NONE으로 리셋한다.
 				if (_stat == _STAT_UNDER_NORMAL_PROC ) {					
 					_stat = STAT_CMD_COMPLETED;
 				} else { // some error in input args occurs
+                    //_stat = STAT_ERR_NO_ARG 혹은 STAT_ERR_ARG_TYPE
 					_u_ret.byArr[RET_BYTE0] = index; //function index
 				}
 				return;
@@ -309,9 +311,9 @@ void _HRP_:: check() {
 
                 } //  switch (_rcvBuf[2])
 				_u_ret.s_ret.info = index; // store index to info byte
-				_stat = STAT_CMD_COMPLETED;
-				return;
-                //break;
+                break;
+				//_stat = STAT_CMD_COMPLETED;
+				//return;
 
         default:
 				_u_ret.s_ret.info = _cmd;

@@ -24,7 +24,7 @@ class Ardpy:
     __DT_LONG   = 7
     __DT_ULONG	= 8
     __DT_FLOAT	= 9
-    #__DT_DOUBLE	= 10
+    #__DT_DOUBLE= 10
     __DT_STR    = 11
 	
     # dev status error code
@@ -238,17 +238,6 @@ class Ardpy:
                         dtype, ret, info = self.__read_data()
                         #print('info:%d'%info)
                         raise Exception('Unknown error(%d) occurred.(dev:0x%x)'%(stat, self.__addr))
-
-    """
-    '''
-        handy method for function call
-        call_func(0, (11,'byte'), (3.14,'float')...)
-    '''
-    def call_func(self, index, args):
-        for k in range(len(args)):
-            self.set_arg(args[k][0], k, args[k][1]) #value, index, type
-        self.exec_func(index)
-    """        
 
     # internal modules and functions =================================
     import smbus as __smbus
