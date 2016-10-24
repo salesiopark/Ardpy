@@ -333,20 +333,18 @@ smbus.read_i2c_block_data()가 수행되면 _onReceive()함수가 호출된 후
 _onRequest()함수도 호출된다.
 --------------------------------------------------------------*/
 void _HRP_::_onReceive(int count) { //static function
-    // _cmd를 _rcvBuf[0]와 중복 저장하는 이유가 있다.
-    // 이후에 _CMD_SEND_BACK 요구에 의해서 _cmd_i2c가 변경되기 때문이다.
-    
     _cmd_i2c = Wire.read(); // 첫 바이트는 *항상* command
-    
     //만약 smbus.read_i2c_block_data()호출이라면 여기서 종료되고
     //바로 _onRequest() 함수가 호출된다.
     if (count > 1) {
-        _idx = 0;
-        while( Wire.available() ) {
+        // _cmd를 _rcvBuf[0]와 중복 저장하는 이유는
+        // 이후에 _CMD_SEND_BACK 요구에 의해서 _cmd_i2c가 변경되기 때문이다.
+        _rcvBuf[0] = _cmd_i2c;
+        _idx = 1;
+        while(Wire.available())
             _rcvBuf[_idx++] = Wire.read();
-        }
-        //_len_just_rcvd = _idx;
     } //if (count>1)
+    // 이 시점에서 idx에 받은 데이터(cmd포함)의 길이가 남는다.
 }
 
 void _HRP_::_onRequest() { 

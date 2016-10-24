@@ -89,7 +89,8 @@ class Ardpy:
             raise Exception('i2c address is out of bound.')
         ans = input('This will change the i2c addr of the device. proceed? [y/n]')
         if ans!='y': return
-        byte_list = [self.__CMD_CHANGE_ADDR, addr] 
+        #byte_list = [self.__CMD_CHANGE_ADDR, addr] 
+        byte_list = [addr] 
         self.__write_i2c_cmd(self.__CMD_CHANGE_ADDR, byte_list)
         self.__wait_until_cmd_handled()
         print('i2c address of the device has changed to 0x%x.'%self.addr)
@@ -106,7 +107,7 @@ class Ardpy:
     def __reg_arg(self, index, dtype, lst_data):
         if index >= self.__max_arg_num:
             raise Exception('Arg index must be under %d.'%self.__max_arg_num)
-        lst_pckt = [self.__CMD_SEND_ARG, index, dtype] 
+        lst_pckt = [index, dtype]
         lst_pckt.extend(lst_data)
         self.__lst_args[index] = lst_pckt
         #print('lst_pckt:%s'%lst_pckt)
@@ -196,8 +197,7 @@ class Ardpy:
             # and then, send func execution command
             # wait until func finishied
             self.__send_args() 
-            send_pckt = [self.__CMD_EXEC_FUNC, index] 
-            self.__write_i2c_cmd(self.__CMD_EXEC_FUNC, send_pckt) 
+            self.__write_i2c_cmd(self.__CMD_EXEC_FUNC, [index]) 
             stat = self.__wait_until_cmd_handled() 
 
             # 함수 실행이 성공한 경우
@@ -222,7 +222,7 @@ class Ardpy:
                     return ( self.__struct.unpack('L', bytes( lst ) ) )[0]
                 elif dtype == self.__DT_FLOAT:
                     return ( self.__struct.unpack('f', bytes(lst)) )[0]
-                else : return None #self.DT_NONE
+                else: return None #self.DT_NONE
 
             # 함수 실행이 실패한 경우 정해진 횟수 만큼 다시 실행을 반복한 후
             # 여전히 에러가 발행하면 오류를 발생시킨다.
@@ -358,17 +358,20 @@ class Ardpy:
        ====================================================================
     """
     def __write_i2c_cmd(self, cmd, byte_list):
-        #print('wrt_data (cmd:%d) >> lst:%s'%(cmd, byte_list))
+        orgn_data = [cmd]
+        orgn_data.extend(byte_list) 
+        #print('wrt_data >> %s'%orgn_data)
         writeSuccess = False
         tryCount = 0
         while not writeSuccess:
             try:
                 self.__i2c.write_i2c_block_data(self.__addr, cmd, byte_list)
                 # 보냈던 데이터를 그대로 다시 받는다
-                sent_back = self.__read_i2c_data(self.__CMD_SEND_BACK, len(byte_list), checksum=False)
+                lenData = len(byte_list)+1 # cmd까지 포함한 길이
+                sent_back = self.__read_i2c_data(self.__CMD_SEND_BACK, lenData, checksum=False)
                 #print('back_data << lst:%s'%sent_back)
-                if sent_back == byte_list:  # 보낸 것과 받은 것이 같은 경우에만
-                    writeSuccess = True     # 성공한 것으로 
+                if sent_back == orgn_data:  # 보낸 것과 받은 것이 같은 경우에만
+                    writeSuccess = True     # 성공한 것으로 판단
 
                     notiSuccess = False     # 그리고 OK신호를 보낸다.
                     while not notiSuccess:
