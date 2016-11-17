@@ -37,11 +37,19 @@ class Ardpy:
     __STAT_ERR_ARG_TYPE       = 6 # 에러:arg의 type 불일치
 
     #__EXE_ERR_RETRY = 3 # maximum retry no when exec_func fails
+    __WAIT_I2C_COUNT  = 5 #
     __WAIT_COUNT    = 20 #maximum trial number for i2c communication 
     __TIMEOUT		= 2.0 #sec.
     __MAX_RETRY_CNT	= 5 # maximum retry number when data corruptted
     __RET_DATA_LEN	= 7
 
+    # internal modules and functions =================================
+    import smbus as __smbus
+    import struct as __struct
+    import datetime as __datetime
+
+    """
+    """
     def __init__(self, addr, port = 1):
         self.__addr = addr
         self.__i2c = self.__smbus.SMBus(port)
@@ -241,11 +249,6 @@ class Ardpy:
                         #print('info:%d'%info)
                         raise Exception('Unknown error(%d) occurred.(dev:0x%x)'%(stat, self.__addr))
 
-    # internal modules and functions =================================
-    import smbus as __smbus
-    import struct as __struct
-    import datetime as __datetime
-
     def __reset_args(self):
         """reset all the function argument(list) as None"""
         self.__lst_args = []
@@ -357,38 +360,71 @@ class Ardpy:
         처리하는 구조로 되어 있어서 데이커가 손실없이 전송되었는지를 100% 보장할 수 있음.
        ====================================================================
     """
-    def __write_i2c_cmd(self, cmd, byte_list):
-        orgn_data = [cmd]
-        orgn_data.extend(byte_list) 
-        print('wrt_data >> %s'%orgn_data)
+    def __raw_i2c_write(self, cmd, byte_list):
         writeSuccess = False
         tryCount = 0
         while not writeSuccess:
-            try:
+            try: 
                 self.__i2c.write_i2c_block_data(self.__addr, cmd, byte_list)
-                # 보냈던 데이터를 그대로 다시 받는다
-                lenData = len(byte_list)+1 # cmd까지 포함한 길이
-                sent_back = self.__read_i2c_data(self.__CMD_SEND_BACK, lenData, checksum=False)
-                print('back_data << lst:%s'%sent_back)
-                if sent_back == orgn_data:  # 보낸 것과 받은 것이 같은 경우에만
-                    writeSuccess = True     # 성공한 것으로 판단
-
-                    notiSuccess = False     # 그리고 OK신호를 보낸다.
-                    while not notiSuccess:
-                        if self.__read_confirm_ok() == self.__STAT_UNDER_NORMAL_PROC:
-                            notiSuccess = True
-                        else:
-                            tryCount += 1
-                            if (tryCount >= self.__WAIT_COUNT):
-                                raise Exception( 'i2c write OK error.' )
-                else:
-                    tryCount += 1
-                    if (tryCount >= self.__WAIT_COUNT):
-                        raise Exception( 'i2c write data error.' )
+                writeSuccess = True
+            except IOError:
+                tryCount += 1
+                if (tryCount >= self.__WAIT_COUNT):
+                    raise Exception( 'i2c raw write error.' )
+    
+    def __write_i2c_cmd(self, cmd, byte_list):
+        orgn_data = [cmd]
+        orgn_data.extend(byte_list) 
+        writeSuccess = False
+        tryCount = 0
+        while not writeSuccess:
+            """
+            try: 
+                self.__i2c.write_i2c_block_data(self.__addr, cmd, byte_list)
             except IOError:
                 tryCount += 1
                 if (tryCount >= self.__WAIT_COUNT):
                     raise Exception( 'i2c communication error.' )
+            """
+            self.__raw_i2c_write(cmd, byte_list)
+
+            # 보냈던 데이터를 그대로 다시 받는다
+            lenData = len(byte_list)+1 # cmd까지 포함한 길이
+            sent_back = self.__read_i2c_data(self.__CMD_SEND_BACK, lenData, checksum=False)
+            #print('back_data << lst:%s'%sent_back)
+            if sent_back == orgn_data:  # 보낸 것과 받은 것이 같은 경우에만
+                writeSuccess = True     # 성공한 것으로 판단하고 빠져나간다.
+                
+                """
+                notiSuccess = False     # 그리고 OK신호를 보낸다.
+                while not notiSuccess:
+                    if self.__read_confirm_ok() == self.__STAT_UNDER_NORMAL_PROC:
+                        notiSuccess = True
+                    else:
+                        tryCount += 1
+                        if (tryCount >= self.__WAIT_COUNT):
+                            raise Exception( 'i2c write OK error.' )
+                """
+            else:
+                tryCount += 1
+                print('%d: S%s, R%s'%(tryCount, orgn_data, sent_back))
+                if (tryCount >= self.__WAIT_COUNT):
+                    raise Exception( 'i2c data confirm error.' )
+                    
+        self.__noti_ok()
+
+    # ok 신호를 보낸다.
+    def __noti_ok(self):
+        notiSuccess = False     # 그리고 OK신호를 보낸다.
+        tryCount = 0
+        while not notiSuccess:
+            res = self.__read_i2c_data(cmd = self.__CMD_CHECK_OK, length =2)
+            if res[0] == self.__STAT_UNDER_NORMAL_PROC:
+                notiSuccess = True
+            else:
+                tryCount += 1
+                if (tryCount >= self.__WAIT_COUNT):
+                    raise Exception( 'i2c write noti_OK error.' )
 
     """====================================================================
         아두이노에서 데이터를 읽어온다.
@@ -396,7 +432,41 @@ class Ardpy:
         단 보낸 데이터를 받는 경우에는 체크썸을 사용하지 않는다. (checksum = False)
        ====================================================================
     """
+    def __raw_i2c_read(self, cmd, length):
+        readSuccess = False
+        tryCount = 0
+        res = None
+        while not readSuccess:
+            try:
+                res = self.__i2c.read_i2c_block_data(self.__addr, cmd, length)
+                readSuccess = True
+            except IOError: # hardware error
+                tryCount += 1
+                if (retryCount >= self.__WAIT_I2C_COUNT):
+                    raise Exception( 'i2c raw read error.' )
+        return res
 
+    def __read_i2c_data(self, cmd, length, checksum=True):
+        readSuccess = False
+        tryCount = 0
+        res = None
+        while not readSuccess:
+            tryCount += 1
+            res = self.__raw_i2c_read(cmd, length)
+            if checksum: #체크썸을 사용하는 경우
+                csum = self.__checksum(res[:-1], cmd = cmd)
+                #print('rd_data (cmd:%d) << res:%s, csum:%s, cnt:%d'%(cmd, res, csum, retryCount))
+                readSuccess = ( csum == res[-1] )
+            elif res != None:
+                readSuccess = True
+
+            #(통신은 이루어졌으나) 체크썸이 정해진 횟수 이상 불일치하면 예외 발생
+            if (tryCount >= self.__WAIT_COUNT):
+                #아래에서 바로 실행이 멈춘다.
+                raise Exception('i2c read checksum error.')
+        return res
+        
+    """
     def __read_i2c_data(self, cmd, length, checksum=True):
         readSuccess = False
         retryCount = 0
@@ -419,3 +489,4 @@ class Ardpy:
                 if (retryCount >= self.__WAIT_COUNT):
                     raise Exception( 'i2c read error.' )
         return res
+        """

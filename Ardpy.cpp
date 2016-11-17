@@ -4,6 +4,7 @@
 * by salesiopark(박장현, 국립목포대학교, 전기제어공학과)
 * <Wire.h> must be included before including <Ardpy.h> in user .ino file
 ************************************************************************/
+//#define __DEBUG__
 
 #include "Ardpy.h"
 #include "Wire.h"
@@ -26,7 +27,6 @@ byte                    _HRP_::_max_arg_num = __INIT_MAX_ARG_NUM__;
 pfunc_t*                _HRP_::_tmpFuncArr = NULL;
 byte                    _HRP_::_num_funcs = 0;
 pfunc_t*                _HRP_::_funcArr = NULL;
-//volatile byte           _HRP_::_len_just_rcvd = 0;
 
 // ---------
 void _HRP_::set_max_arg_num(byte num) {
@@ -121,7 +121,9 @@ byte _HRP_::begin(byte addr, uint32_t dev_id) {
 	_stat = STAT_CMD_COMPLETED;
 	Wire.begin( addr_real );
     
-    //Serial.begin(115200); // for debugging
+    #ifdef __DEBUG__ //################################
+        Serial.begin(115200); // for debugging
+    #endif //##########################################
     
 	return addr_real;	
 }
@@ -339,25 +341,51 @@ void _HRP_::_onReceive(int count) { //static function
     _cmd_i2c = Wire.read(); // 첫 바이트는 *항상* command
     //만약 smbus.read_i2c_block_data()호출이라면 여기서 종료되고
     //바로 _onRequest() 함수가 호출된다.
-    //Serial.println(_cmd_i2c);
+    
+    #ifdef __DEBUG__ //#######################
+        Serial.print("->[");
+        Serial.print(_cmd_i2c);
+    #endif //#################################
+    
     if (count > 1) {
         // _cmd를 _rcvBuf[0]와 중복 저장하는 이유는
         // 이후에 _CMD_SEND_BACK 요구에 의해서 _cmd_i2c가 변경되기 때문이다.
         _rcvBuf[0] = _cmd_i2c;
         _idx = 1;
-        while(Wire.available()) {
+        while(--count > 0) {
             _rcvBuf[_idx++] = Wire.read();
-            //Serial.println(_rcvBuf[_idx-1]);
+
+            #ifdef __DEBUG__ //########################
+                Serial.print(", ");
+                Serial.print(_rcvBuf[_idx-1]);
+            #endif //##################################
         }
     } //if (count>1)
+    
+    #ifdef __DEBUG__ //###########################
+        Serial.println("]");
+    #endif //#####################################
+    
+    // 17/Nov/2016 지연코드가 왜 필요한 지를 모르겠다.
+    delayMicroseconds(1000);
+
     // 이 시점에서 idx에 받은 데이터(cmd포함)의 길이가 남는다.
 }
 
 void _HRP_::_onRequest() { 
     switch(_cmd_i2c) { // switch(_rcvBuf[0]) { // command
-
         case _CMD_SEND_BACK:
-            //Wire.write( (const byte*)_rcvBuf, _len_just_rcvd);
+
+            #ifdef __DEBUG__ //#######################
+                Serial.print("<-[");
+                for(byte k=0; k<_idx; k++){
+                    Serial.print(_rcvBuf[k]);
+                    if (k<_idx-1)
+                        Serial.print(", ");
+                }
+                Serial.println("]");
+            #endif //##################################
+            
             // _idx는 직전 데이터의 길이가 기록되어 있다.
             Wire.write( (const byte*)_rcvBuf, _idx);
             break;

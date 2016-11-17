@@ -13,7 +13,7 @@ void setup() {
     pinMode(13, OUTPUT);
     Ardpy.add_func(ledon);
     Ardpy.add_func(ledoff);
-    Ardpy.begin(0x11, 108);
+    Ardpy.begin(0x11, 111);
 }
 
 void loop() {

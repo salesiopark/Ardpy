@@ -54,3 +54,10 @@ class Ledm(Ardpy):
         else:
             pass
 
+    def _test(self):
+        import time
+        while True:
+            for k in range(10):
+                self.write(str(k))
+                time.sleep(0.1)
+                
