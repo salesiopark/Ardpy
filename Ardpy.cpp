@@ -362,7 +362,7 @@ void _HRP_::_onReceive(int count) { //static function
                 Serial.print(_rcvBuf[_idx-1]);
             #endif //##################################
         }
-    } //if (count>1)
+    } 
     
     #ifdef __DEBUG__ //###########################
         Serial.print("]");
@@ -371,7 +371,7 @@ void _HRP_::_onReceive(int count) { //static function
     
     // 17/Nov/2016 일정한 지연이 있어야 통신 오류가 안난다.
     // 이게  왜 필요한 지를 모르겠다.
-    delayMicroseconds(1000);
+    delayMicroseconds(500);
 
     // 이 시점에서 _idx에는 받은 데이터(cmd포함)의 길이가 남는다.
 }

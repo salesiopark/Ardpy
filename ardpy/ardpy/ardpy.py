@@ -347,6 +347,13 @@ class Ardpy:
         처리하는 구조로 되어 있어서 데이커가 손실없이 전송되었는지를 100% 보장할 수 있음.
        ====================================================================
     """
+    
+    def __raw_i2c_write(self, cmd, byte_list):
+        try: 
+            self.__i2c.write_i2c_block_data(self.__addr, cmd, byte_list)
+        except IOError:
+            raise Exception( 'i2c raw write error.' )
+    """
     def __raw_i2c_write(self, cmd, byte_list):
         writeSuccess = False
         tryCount = 0
@@ -358,7 +365,7 @@ class Ardpy:
                 tryCount += 1
                 if (tryCount >= self.__WAIT_COUNT):
                     raise Exception( 'i2c raw write error.' )
-    
+    """
     def __write_i2c_cmd(self, cmd, byte_list):
         orgn_data = [cmd]
         orgn_data.extend(byte_list) 
@@ -411,6 +418,16 @@ class Ardpy:
         단 보낸 데이터를 받는 경우에는 체크썸을 사용하지 않는다. (checksum = False)
        ====================================================================
     """
+    
+    def __raw_i2c_read(self, cmd, length):
+        res = None
+        try:
+            res = self.__i2c.read_i2c_block_data(self.__addr, cmd, length)
+        except IOError: # hardware error
+            raise Exception( 'i2c raw read error.' )
+        return res
+
+    """
     def __raw_i2c_read(self, cmd, length):
         readSuccess = False
         tryCount = 0
@@ -424,7 +441,7 @@ class Ardpy:
                 if (tryCount >= self.__WAIT_I2C_COUNT):
                     raise Exception( 'i2c raw read error.' )
         return res
-
+    """
     def __read_i2c_data(self, cmd, length, checksum=True):
         readSuccess = False
         tryCount = 0
@@ -434,8 +451,9 @@ class Ardpy:
             res = self.__raw_i2c_read(cmd, length)
             if checksum: #체크썸을 사용하는 경우
                 csum = self.__checksum(res[:-1], cmd = cmd)
-                #print('rd_data (cmd:%d) << res:%s, csum:%s, cnt:%d'%(cmd, res, csum, tryCount))
                 readSuccess = ( csum == res[-1] )
+                #print('rd_data (cmd:%d) << res:%s, csum:%s, cnt:%d'%(cmd, res, csum, tryCount))
+                
             elif res != None:
                 readSuccess = True
 
