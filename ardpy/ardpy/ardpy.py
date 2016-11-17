@@ -59,19 +59,6 @@ class Ardpy:
         print('Number of functions : %d'%self.__num_funcs)
         print('Maximum number of function arguments : %d'%self.__max_arg_num)
 
-        '''
-        #04/May/2016 create funcNN as many as in Arduino
-        if self.__num_funcs > 0:
-            self.func0 = lambda *args:self.call_func(0, args)
-        if self.__num_funcs > 1:
-            self.func1 = lambda *args:self.call_func(1, args)
-        if self.__num_funcs > 2:
-            self.func2 = lambda *args:self.call_func(2, args)
-
-        # the following code does NOT work because of self variable.
-        #for k in range(self.__num_funcs):
-        #    exec('self.func%d=lambda *args:self.call_func(%d,args)'%(k,k))
-        '''
     @property
     def device_id(self):
         '''
@@ -378,14 +365,6 @@ class Ardpy:
         writeSuccess = False
         tryCount = 0
         while not writeSuccess:
-            """
-            try: 
-                self.__i2c.write_i2c_block_data(self.__addr, cmd, byte_list)
-            except IOError:
-                tryCount += 1
-                if (tryCount >= self.__WAIT_COUNT):
-                    raise Exception( 'i2c communication error.' )
-            """
             self.__raw_i2c_write(cmd, byte_list)
 
             # 보냈던 데이터를 그대로 다시 받는다
@@ -442,7 +421,7 @@ class Ardpy:
                 readSuccess = True
             except IOError: # hardware error
                 tryCount += 1
-                if (retryCount >= self.__WAIT_I2C_COUNT):
+                if (tryCount >= self.__WAIT_I2C_COUNT):
                     raise Exception( 'i2c raw read error.' )
         return res
 
@@ -455,7 +434,7 @@ class Ardpy:
             res = self.__raw_i2c_read(cmd, length)
             if checksum: #체크썸을 사용하는 경우
                 csum = self.__checksum(res[:-1], cmd = cmd)
-                #print('rd_data (cmd:%d) << res:%s, csum:%s, cnt:%d'%(cmd, res, csum, retryCount))
+                #print('rd_data (cmd:%d) << res:%s, csum:%s, cnt:%d'%(cmd, res, csum, tryCount))
                 readSuccess = ( csum == res[-1] )
             elif res != None:
                 readSuccess = True

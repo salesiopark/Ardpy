@@ -336,11 +336,13 @@ smbus.write_i2c_block_data()가 수행되면 _onReceive()함수만 호출된다.
 
 smbus.read_i2c_block_data()가 수행되면 _onReceive()함수가 호출된 후
 _onRequest()함수도 호출된다.
+
+count에는 cmd까지 포함된 길이가 넘어온다. 즉, 데이터길이+1 이다.
 --------------------------------------------------------------*/
 void _HRP_::_onReceive(int count) { //static function
     _cmd_i2c = Wire.read(); // 첫 바이트는 *항상* command
-    //만약 smbus.read_i2c_block_data()호출이라면 여기서 종료되고
-    //바로 _onRequest() 함수가 호출된다.
+    //만약 smbus.read_i2c_block_data()호출이라면 (count==1)
+    // 여기서 종료되고 바로 _onRequest() 함수가 호출된다.
     
     #ifdef __DEBUG__ //#######################
         Serial.print("->[");
@@ -363,13 +365,15 @@ void _HRP_::_onReceive(int count) { //static function
     } //if (count>1)
     
     #ifdef __DEBUG__ //###########################
-        Serial.println("]");
+        Serial.print("]");
+        Serial.println(_idx);
     #endif //#####################################
     
-    // 17/Nov/2016 지연코드가 왜 필요한 지를 모르겠다.
+    // 17/Nov/2016 일정한 지연이 있어야 통신 오류가 안난다.
+    // 이게  왜 필요한 지를 모르겠다.
     delayMicroseconds(1000);
 
-    // 이 시점에서 idx에 받은 데이터(cmd포함)의 길이가 남는다.
+    // 이 시점에서 _idx에는 받은 데이터(cmd포함)의 길이가 남는다.
 }
 
 void _HRP_::_onRequest() { 
