@@ -1,5 +1,5 @@
 /***********************************************************************
-* Ardpy.h ver 1.0
+* Ardpy.h ver 1.1
 * Arduino library for i2c (slave) communication with Raspberry pi.
 * by salesiopark(박장현, 국립목포대학교, 전기제어공학과)
 * <Wire.h> must be included before including <Ardpy.h> in user .ino file
@@ -120,6 +120,9 @@ byte _HRP_::begin(byte addr, uint32_t dev_id) {
 
 	_stat = STAT_CMD_COMPLETED;
 	Wire.begin( addr_real );
+    
+    //Serial.begin(115200); // for debugging
+    
 	return addr_real;	
 }
 
@@ -336,13 +339,16 @@ void _HRP_::_onReceive(int count) { //static function
     _cmd_i2c = Wire.read(); // 첫 바이트는 *항상* command
     //만약 smbus.read_i2c_block_data()호출이라면 여기서 종료되고
     //바로 _onRequest() 함수가 호출된다.
+    //Serial.println(_cmd_i2c);
     if (count > 1) {
         // _cmd를 _rcvBuf[0]와 중복 저장하는 이유는
         // 이후에 _CMD_SEND_BACK 요구에 의해서 _cmd_i2c가 변경되기 때문이다.
         _rcvBuf[0] = _cmd_i2c;
         _idx = 1;
-        while(Wire.available())
+        while(Wire.available()) {
             _rcvBuf[_idx++] = Wire.read();
+            //Serial.println(_rcvBuf[_idx-1]);
+        }
     } //if (count>1)
     // 이 시점에서 idx에 받은 데이터(cmd포함)의 길이가 남는다.
 }

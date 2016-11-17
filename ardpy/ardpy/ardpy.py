@@ -153,7 +153,7 @@ class Ardpy:
             Transmit string to the Ardpy (arduino) device.
             Up to 27 ASCII characters can be transmitted.
             """
-            lst_data = list( string.encode('utf-8') ) 
+            lst_data = list( val.encode('utf-8') ) 
             lst_data.append(0) # append null character in the end
             self.__reg_arg(index, self.__DT_STR, lst_data)
         else:
@@ -360,7 +360,7 @@ class Ardpy:
     def __write_i2c_cmd(self, cmd, byte_list):
         orgn_data = [cmd]
         orgn_data.extend(byte_list) 
-        #print('wrt_data >> %s'%orgn_data)
+        print('wrt_data >> %s'%orgn_data)
         writeSuccess = False
         tryCount = 0
         while not writeSuccess:
@@ -369,7 +369,7 @@ class Ardpy:
                 # 보냈던 데이터를 그대로 다시 받는다
                 lenData = len(byte_list)+1 # cmd까지 포함한 길이
                 sent_back = self.__read_i2c_data(self.__CMD_SEND_BACK, lenData, checksum=False)
-                #print('back_data << lst:%s'%sent_back)
+                print('back_data << lst:%s'%sent_back)
                 if sent_back == orgn_data:  # 보낸 것과 받은 것이 같은 경우에만
                     writeSuccess = True     # 성공한 것으로 판단
 

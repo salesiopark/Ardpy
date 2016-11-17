@@ -1,6 +1,6 @@
-from . import Ard
+from . import Ardpy
 
-class TLcd(Ard):
+class Tlcd(Ardpy):
 
 	def __init__(self, addr, port = 1):
 		super().__init__(addr, port = port)
@@ -11,7 +11,7 @@ class TLcd(Ard):
 		return self._exec_func(0)
 
 	def print(self, text):
-		self._send_str(text)
+		self._set_str(text, type='str')
 		return self._exec_func(1)
 
 	def display(self):
