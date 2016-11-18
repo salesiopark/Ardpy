@@ -1,6 +1,12 @@
 from . import Ardpy
 
 class Arduno(Ardpy):
+    '''
+    Arduno class for controlling Arduno device.
+    The Arduno device is composed of Arduino nano and I2C sockets.
+    '''
+    _VERSION = '0.8.0'
+    
     INPUT           = 0
     OUTPUT          = 1
     INPUT_PULLUP    = 2

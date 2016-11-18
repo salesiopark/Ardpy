@@ -162,16 +162,18 @@ class _HRP_ {
         // python read this info at initial stage and
         // use the info for check validity of number of args and functions
         // thus it needs no checking those in arduino code
-		struct _S_Id {
-			uint32_t		val;
-			byte			numArgs; // maximnum arg num
-			byte			numFuncs;// number of functions
-			byte 			checksum;
+        struct _S_Id {
+            uint32_t        val;
+            byte            numArgs; // maximnum arg num
+            byte            numFuncs;// number of functions
+            byte            verA;
+            byte            verBC;
+            byte            checksum;
 		};
 
-		union _U_Id {
-			_S_Id 	s_id;
-			byte 		byArr[7];
+        union _U_Id {
+            _S_Id           s_id;
+            byte            byArr[9];
 		};
 
         static void             _onRequest();
@@ -184,6 +186,7 @@ class _HRP_ {
         volatile static byte    _cmd; // command from master device
         volatile static byte    _cmd_i2c; // command from master device
         volatile static byte    _rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ];
+        volatile static byte    __sbuf__[ __MAX_I2C_READ_BUF_LEN__ ];
 
         static pfunc_t*         _tmpFuncArr;
         static pfunc_t*         _funcArr; //__funcs_i2c__;
@@ -196,11 +199,11 @@ class _HRP_ {
 
         static char             _strBuf[ __STR_BUF_LENGTH__ ];
 
-		static byte _max_arg_num;
+        static byte             _max_arg_num;
 
 		//tmp varialbes
-		static byte _checksum;
-		static byte _idx;
+        static byte             _checksum;
+        static byte             _idx;
 }; // closing of *class _HRP_*
 
 // define externally used object name as Harper

@@ -6,20 +6,25 @@
 ************************************************************************/
 //#define __DEBUG__
 
+// firmward(Ardpy)의 버전을 표시한다. ver A.B.C
+#define __VER_ARDPY_A 1 //max 255
+#define __VER_ARDPY_B 1 //max 15
+#define __VER_ARDPY_C 0 //max 15
+
+// includes ------------------------------------------------------------------
 #include "Ardpy.h"
 #include "Wire.h"
 #include <avr/eeprom.h>
-
 // static memebers initialization --------------------------------------------
-
 _HRP_::_U_Id            _HRP_::_u_id = {0xffffffff, };
 volatile byte           _HRP_::_cmd = 0 ;
 volatile byte           _HRP_::_cmd_i2c = 0 ;
 volatile byte           _HRP_::_rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
+volatile byte           _HRP_::__sbuf__[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
+byte                    _HRP_::_idx = 0;
 volatile _HRP_::_U_Ret  _HRP_::_u_ret = {{1,} };
 char                    _HRP_::_strBuf[ __STR_BUF_LENGTH__ ] = {0,};
 byte                    _HRP_::_checksum = 0;
-byte                    _HRP_::_idx = 0;
 volatile byte           _HRP_::_stat = 0;
 volatile byte           _HRP_::_statArr[2]={0,};
 volatile _HRP_::_S_Arg* _HRP_::_args = NULL;
@@ -98,12 +103,14 @@ byte _HRP_::begin(byte addr, uint32_t dev_id) {
 	_u_id.s_id.val = dev_id;
 	_u_id.s_id.numArgs = _max_arg_num;
 	_u_id.s_id.numFuncs = _num_funcs;
+    _u_id.s_id.verA = (byte)(__VER_ARDPY_A);
+    _u_id.s_id.verBC = (byte)(__VER_ARDPY_B<<4)+__VER_ARDPY_C;
 	
     // 체크썸(_u_id.byArr[6])을 계산 
     _u_id.s_id.checksum = 0xff - (byte)( _CMD_READ_ID
         + _u_id.byArr[0] + _u_id.byArr[1] + _u_id.byArr[2] + _u_id.byArr[3]
-        + _u_id.byArr[4]
-        + _u_id.byArr[5]);
+        + _u_id.byArr[4] + _u_id.byArr[5] + _u_id.byArr[6] + _u_id.byArr[7]
+    );
 
 	// if addr in EEPROM is valid, use that.
 	byte addr_real = addr;
@@ -334,11 +341,12 @@ void _HRP_:: check() {
 i2c ISR functions 
 smbus.write_i2c_block_data()가 수행되면 _onReceive()함수만 호출된다.
 
-smbus.read_i2c_block_data()가 수행되면 _onReceive()함수가 호출된 후
-_onRequest()함수도 호출된다.
+smbus.read_i2c_block_data(addr.cmd,data)가 수행되면
+_onReceive()함수가 호출된 후 _onRequest()함수도 호출된다.
 
-count에는 cmd까지 포함된 길이가 넘어온다. 즉, 데이터길이+1 이다.
+count에는 cmd까지 포함된 길이 즉, 데이터길이+1 이다. len(list)+1
 --------------------------------------------------------------*/
+
 void _HRP_::_onReceive(int count) { //static function
     _cmd_i2c = Wire.read(); // 첫 바이트는 *항상* command
     //만약 smbus.read_i2c_block_data()호출이라면 (count==1)
@@ -362,22 +370,20 @@ void _HRP_::_onReceive(int count) { //static function
                 Serial.print(_rcvBuf[_idx-1]);
             #endif //##################################
         }
-    } 
+        return;
+    }
     
     #ifdef __DEBUG__ //###########################
         Serial.print("]");
         Serial.println(_idx);
     #endif //#####################################
-    
-    // 17/Nov/2016 일정한 지연이 있어야 통신 오류가 안난다.
-    // 이게  왜 필요한 지를 모르겠다.
-    delayMicroseconds(500);
 
     // 이 시점에서 _idx에는 받은 데이터(cmd포함)의 길이가 남는다.
 }
 
+
 void _HRP_::_onRequest() { 
-    switch(_cmd_i2c) { // switch(_rcvBuf[0]) { // command
+    switch(_cmd_i2c) {
         case _CMD_SEND_BACK:
 
             #ifdef __DEBUG__ //#######################
@@ -391,7 +397,18 @@ void _HRP_::_onRequest() {
             #endif //##################################
             
             // _idx는 직전 데이터의 길이가 기록되어 있다.
-            Wire.write( (const byte*)_rcvBuf, _idx);
+            // 18/Nov/2016 아래와 같이 _rcvBuf를 미리 복사해서 
+            // 이것을 Wire.write()에 넘겨주어야 통신 오류가 억제된다.
+
+            for(byte k=0; k<_idx; k++) {
+                __sbuf__[k]=_rcvBuf[k];
+            }
+            Wire.write( (const byte*)__sbuf__, _idx);
+            
+            // 이유를 짐작해보면 Wire.write()함수를 수행하는 도중에 onReceive()가
+            // 호출되어 )_rcvBuf 메모리 내용이 바뀔 수도 있지 않을까 싶다.
+            // 따라서 아래와 같이 Wire.write()함수에 _rcvBuf를 넘져주면 안된다.
+            //Wire.write( (const byte*)_rcvBuf, _idx);
             break;
 
 		case _CMD_CHECK_OK:
@@ -417,7 +434,7 @@ void _HRP_::_onRequest() {
 			break;
 
 		case _CMD_READ_ID:
-			Wire.write( (const byte*)_u_id.byArr, 7);
+			Wire.write( (const byte*)_u_id.byArr, sizeof(_S_Id) );
 			break;
 			
         // 21/Oct/2016 추가 ret데이터도 원본비교

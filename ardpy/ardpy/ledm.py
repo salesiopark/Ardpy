@@ -2,7 +2,16 @@ from . import Ardpy
 #import time
 
 class Ledm(Ardpy):
-    #__DELAYTM = 0.001
+    '''
+    on(index)
+    off(index)
+    on_xy(x,y)
+    off_xy(x,y)
+    clear()
+    write(str)
+    '''
+    _VERSION = '1.0.0'
+    
     import struct as __struct
     __table = {
         '0':[0b0111110, 0b1010001, 0b1001001, 0b1000101, 0b0111110],
