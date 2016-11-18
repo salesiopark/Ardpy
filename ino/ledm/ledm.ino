@@ -1,3 +1,10 @@
+/***********************************************************************
+* (ardpy)Ledm device firmware
+************************************************************************/
+#define __VER_LEDM_A 1
+#define __VER_LEDM_B 0
+#define __VER_LEDM_C 0
+//======================================================================
 #include <Wire.h> // must be included befor Ardpy.h
 #include <Ardpy.h>
 
@@ -89,9 +96,8 @@ void setup() {
     Ardpy.add_func(clear);// _exec_func(2)
     Ardpy.add_func(setall);// _exec_func(3)
 
-	Ardpy.begin(0x10, 1);
+	Ardpy.begin(0x11, 101);
 }
-
 
 byte col = 0;
 void loop() { 

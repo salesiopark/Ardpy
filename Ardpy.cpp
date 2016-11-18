@@ -7,6 +7,7 @@
 //#define __DEBUG__
 
 // firmward(Ardpy)의 버전을 표시한다. ver A.B.C
+//  이 숫자는 2바이트로 묶여서 전송된다.
 #define __VER_ARDPY_A 1 //max 255
 #define __VER_ARDPY_B 1 //max 15
 #define __VER_ARDPY_C 1 //max 15
