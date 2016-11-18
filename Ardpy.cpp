@@ -9,7 +9,7 @@
 // firmward(Ardpy)의 버전을 표시한다. ver A.B.C
 #define __VER_ARDPY_A 1 //max 255
 #define __VER_ARDPY_B 1 //max 15
-#define __VER_ARDPY_C 0 //max 15
+#define __VER_ARDPY_C 1 //max 15
 
 // includes ------------------------------------------------------------------
 #include "Ardpy.h"
@@ -362,7 +362,8 @@ void _HRP_::_onReceive(int count) { //static function
         // 이후에 _CMD_SEND_BACK 요구에 의해서 _cmd_i2c가 변경되기 때문이다.
         _rcvBuf[0] = _cmd_i2c;
         _idx = 1;
-        while(--count > 0) {
+        while(--count > 0) { // 통신 오류 빈도가 더 높음
+        //while(Wire.available()){ //이게 더 통신 오류 빈도가 작은 것 같다.
             _rcvBuf[_idx++] = Wire.read();
 
             #ifdef __DEBUG__ //########################

@@ -1,6 +1,6 @@
 class Ardpy:
     # version
-    _VERSION = '1.1.0'
+    _VERSION = '1.1.1'
     
     # command constant to arduino
     __CMD_READ_DATA   = 0
@@ -423,10 +423,11 @@ class Ardpy:
     """
     
     __i2c_err_msg = """Check the followings:
-    1. The i2c address is correct.
-    2. The circuit is correctily wired.
-    3. Arduino(slave) is appropriately working."""
-    
+    1. The interface circuit is correctily wired.
+    2. The i2c address is correct.
+    3. Arduino(i2c slave) is properly working."""
+
+    '''
     def __raw_i2c_read(self, cmd, length):
         try:
             res = self.__i2c.read_i2c_block_data(self.__addr, cmd, length)
@@ -439,9 +440,12 @@ class Ardpy:
             self.__i2c.write_i2c_block_data(self.__addr, cmd, byte_list)
         except IOError:
             raise Exception( 'i2c write error.'+self.__i2c_err_msg )
-
-    # 궂이 아래와 같이 할 필요가 없을 것 같다.
     '''
+    # 즉, 위와 같이 예외 한 번에 머무면 실행이 도중에 멈추는 경우가 많다.
+    # 한 번 예외가 발생했다고 연결이 끊긴 것이 아닐 수 있기 때문이다.
+    # smbus함수에서 예외가 한 번 발생했다하더라도 몇 번 더 시도해 보아야 한다.
+    # 따라서 반드시 아래와 같이 몇 번 더 시도해 보고 계속 예외가 발생하면 그때 멈춘다.
+    
     def __raw_i2c_read(self, cmd, length):
         readSuccess = False
         tryCount = 0
@@ -453,7 +457,7 @@ class Ardpy:
             except IOError: # hardware error
                 tryCount += 1
                 if (tryCount >= self.__WAIT_I2C_COUNT):
-                    raise Exception( 'i2c read error.'+self.__i2c_err_msg )
+                    raise Exception( 'i2c read error. '+self.__i2c_err_msg )
         return res
     
     def __raw_i2c_write(self, cmd, byte_list):
@@ -466,5 +470,4 @@ class Ardpy:
             except IOError:
                 tryCount += 1
                 if (tryCount >= self.__WAIT_I2C_COUNT):
-                    raise Exception( 'i2c write error.'+self.__i2c_err_msg )
-    '''
+                    raise Exception( 'i2c write error. '+self.__i2c_err_msg )
