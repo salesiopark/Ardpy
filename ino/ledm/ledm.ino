@@ -101,7 +101,8 @@ void setup() {
 
 byte col = 0;
 void loop() { 
-
+    Ardpy.check(); // 
+    
     switch(col) {
         case 0:
             digitalWrite(X4, HIGH);

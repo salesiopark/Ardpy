@@ -27,8 +27,8 @@ class Ledm(Ardpy):
     }
     
 
-    def __init__(self, addr, port = 1):
-        super().__init__(addr, port = port)
+    def __init__(self, addr, port = 1, _showErr = False):
+        super().__init__(addr, port = port, _showErr = _showErr)
 
     def on(self, index):
         self.on_xy(index%5, index//5)

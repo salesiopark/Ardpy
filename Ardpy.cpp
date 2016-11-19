@@ -1,16 +1,10 @@
 /***********************************************************************
-* Ardpy.h ver 1.1
+* Ardpy.cpp
 * Arduino library for i2c (slave) communication with Raspberry pi.
 * by salesiopark(박장현, 국립목포대학교, 전기제어공학과)
 * <Wire.h> must be included before including <Ardpy.h> in user .ino file
 ************************************************************************/
 //#define __DEBUG__
-
-// firmward(Ardpy)의 버전을 표시한다. ver A.B.C
-//  이 숫자는 2바이트로 묶여서 전송된다.
-#define __VER_ARDPY_A 1 //max 255
-#define __VER_ARDPY_B 1 //max 15
-#define __VER_ARDPY_C 1 //max 15
 
 // includes ------------------------------------------------------------------
 #include "Ardpy.h"
@@ -21,7 +15,7 @@ _HRP_::_U_Id            _HRP_::_u_id = {0xffffffff, };
 volatile byte           _HRP_::_cmd = 0 ;
 volatile byte           _HRP_::_cmd_i2c = 0 ;
 volatile byte           _HRP_::_rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
-volatile byte           _HRP_::__sbuf__[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
+//volatile byte           _HRP_::__sbuf__[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
 byte                    _HRP_::_idx = 0;
 volatile _HRP_::_U_Ret  _HRP_::_u_ret = {{1,} };
 char                    _HRP_::_strBuf[ __STR_BUF_LENGTH__ ] = {0,};
@@ -232,6 +226,9 @@ void _HRP_:: _reset_all_args() {
 // i2c로 지령(cmd)를 넘겨받은 직후 실행되는 함수.
 // 모든 명령을 처리한 후 정상/에러발생 여부를 저장한다.
 void _HRP_:: check() {
+    // 만약 이 함수를 loop() 안에서 실행한다면 아래를 추가해야 한다.
+    if (_stat != _STAT_UNDER_NORMAL_PROC ) return;
+    
     byte index; // 이것 대신 _idx를 사용하면 안됨
     _cmd = _rcvBuf[0]; //ISR에서 사용되는 변수가 아님
 
@@ -347,7 +344,6 @@ _onReceive()함수가 호출된 후 _onRequest()함수도 호출된다.
 
 count에는 cmd까지 포함된 길이 즉, 데이터길이+1 이다. len(list)+1
 --------------------------------------------------------------*/
-
 void _HRP_::_onReceive(int count) { //static function
     _cmd_i2c = Wire.read(); // 첫 바이트는 *항상* command
     //만약 smbus.read_i2c_block_data()호출이라면 (count==1)
@@ -363,8 +359,8 @@ void _HRP_::_onReceive(int count) { //static function
         // 이후에 _CMD_SEND_BACK 요구에 의해서 _cmd_i2c가 변경되기 때문이다.
         _rcvBuf[0] = _cmd_i2c;
         _idx = 1;
-        while(--count > 0) { // 통신 오류 빈도가 더 높음
         //while(Wire.available()){ //이게 더 통신 오류 빈도가 작은 것 같다.
+        while(--count > 0) { // 통신 오류 빈도가 더 높음. 차이없음
             _rcvBuf[_idx++] = Wire.read();
 
             #ifdef __DEBUG__ //########################
@@ -373,6 +369,11 @@ void _HRP_::_onReceive(int count) { //static function
             #endif //##################################
         }
         return;
+    } else { // smbus.read_i2c_block_data() 호출인 경우
+        // 17Nov2016 아래 지연코드가 있으면 통신오류가 많이 줄어든다.
+        // 이유를 모르겠다. 다만 주로 read 에서 오류가 발생하는 걸 보니
+        // RPi의 i2c stretching clk bug 와 관련이 있겠거니 짐작만.
+        delayMicroseconds(300); //min: 200
     }
     
     #ifdef __DEBUG__ //###########################
@@ -383,7 +384,7 @@ void _HRP_::_onReceive(int count) { //static function
     // 이 시점에서 _idx에는 받은 데이터(cmd포함)의 길이가 남는다.
 }
 
-
+//volatile byte __len__;
 void _HRP_::_onRequest() { 
     switch(_cmd_i2c) {
         case _CMD_SEND_BACK:
@@ -398,34 +399,40 @@ void _HRP_::_onRequest() {
                 Serial.println("]");
             #endif //##################################
             
-            // _idx는 직전 데이터의 길이가 기록되어 있다.
+            // _idx(==__len__)는 직전 데이터의 길이가 기록되어 있다.
             // 18/Nov/2016 아래와 같이 _rcvBuf를 미리 복사해서 
             // 이것을 Wire.write()에 넘겨주어야 통신 오류가 억제된다.
-
-            for(byte k=0; k<_idx; k++) {
+            /*
+            __len__ = _idx;
+            for(byte k=0; k<__len__; k++) {
                 __sbuf__[k]=_rcvBuf[k];
             }
-            Wire.write( (const byte*)__sbuf__, _idx);
+            Wire.write( (const byte*)__sbuf__, __len__);
+            //*/
             
             // 이유를 짐작해보면 Wire.write()함수를 수행하는 도중에 onReceive()가
-            // 호출되어 )_rcvBuf 메모리 내용이 바뀔 수도 있지 않을까 싶다.
-            // 따라서 아래와 같이 Wire.write()함수에 _rcvBuf를 넘져주면 안된다.
-            //Wire.write( (const byte*)_rcvBuf, _idx);
-            break;
+            // 호출되어 )_rcvBuf, _idx 내용이 바뀔 수도 있지 않을까 싶다.
+            // 따라서 아래와 같이 Wire.write()함수에 _rcvBuf를 넘겨주면 안된다.
+            Wire.write( (const byte*)_rcvBuf, _idx);
+            return;
 
 		case _CMD_CHECK_OK:
-			_stat = _STAT_UNDER_NORMAL_PROC;
+			_stat = _STAT_UNDER_NORMAL_PROC;//0
 			_statArr[0] = _stat;
-			_statArr[1]	= 0xff-(_CMD_CHECK_OK + _stat); //checksum
+			//_statArr[1]	= 0xff-(_CMD_CHECK_OK + _stat); 
+            // checksum = 255-(6+0)
+			_statArr[1]	= 249;
 			Wire.write( (const byte*)_statArr, 2);
-            check();//<- place here instead of in loop() function ***
-			break;
+            // 19Nov2016 ISR은 단순하게 유지해야 하으므로
+            // 아래는 loop() 안에서 사용자가 추가하는 것으로 한다.
+            //check();//<- place here instead of in loop() function ***
+			return;
 
 		case _CMD_READ_STAT:
 			_statArr[0] = _stat;
 			_statArr[1]	= 0xff - (_CMD_READ_STAT + _stat);//checksum
 			Wire.write( (const byte*)_statArr, 2);
-			break;
+			return;
 
 		case _CMD_READ_DATA:
 			_checksum = _CMD_READ_DATA;
@@ -433,19 +440,19 @@ void _HRP_::_onRequest() {
 				_checksum += _u_ret.byArr[_idx];
 			_u_ret.s_ret.checksum = 0xff - _checksum;
 			Wire.write( (const byte*)_u_ret.byArr, __RET_DATA_LENGTH__ );
-			break;
+			return;
 
 		case _CMD_READ_ID:
 			Wire.write( (const byte*)_u_id.byArr, sizeof(_S_Id) );
-			break;
+			return;
 			
         // 21/Oct/2016 추가 ret데이터도 원본비교
         case _CMD_CHECK_RET:
-            break;
+            return;
             
 		default:
 			Wire.write(255);
-			break;
+			return;
 	} 
 }
 

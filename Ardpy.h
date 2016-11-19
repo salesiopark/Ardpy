@@ -1,12 +1,17 @@
 /***********************************************************************
-* Pyard.h ver 1.0
+* Ardpy.h ver 1.2.0
 * Arduino library for i2c (slave) communication using python
 * developed by salesioPark (박장현, 국립목포대학교, 전기제어공학과)
-* Note: <Wire.h> must be included before including <Harper.h>
+* Note: <Wire.h> must be included before including <Ardpy.h>
 ************************************************************************/
 #ifndef __ARDPY_H__
 #define __ARDPY_H__
 
+// firmward(Ardpy)의 버전을 표시한다. ver A.B.C
+//  이 숫자는 2바이트로 묶여서 전송된다.
+#define __VER_ARDPY_A 1 //max 255
+#define __VER_ARDPY_B 2 //max 15
+#define __VER_ARDPY_C 0 //max 15
 #include "Arduino.h"
 
 typedef void(*pfunc_t)(void);
@@ -186,7 +191,7 @@ class _HRP_ {
         volatile static byte    _cmd; // command from master device
         volatile static byte    _cmd_i2c; // command from master device
         volatile static byte    _rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ];
-        volatile static byte    __sbuf__[ __MAX_I2C_READ_BUF_LEN__ ];
+        //volatile static byte    __sbuf__[ __MAX_I2C_READ_BUF_LEN__ ];
 
         static pfunc_t*         _tmpFuncArr;
         static pfunc_t*         _funcArr; //__funcs_i2c__;

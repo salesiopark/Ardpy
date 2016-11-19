@@ -1,6 +1,6 @@
 class Ardpy:
     # version
-    _VERSION = '1.1.1'
+    _VERSION = '1.1.3'
     
     # command constant to arduino
     __CMD_READ_DATA   = 0
@@ -52,9 +52,11 @@ class Ardpy:
     import datetime as __datetime
 
     """
+    constructor
     """
-    def __init__(self, addr, port=1, debug=False):
+    def __init__(self, addr, port=1, _showErr=False):
         self.__addr = addr
+        self.__showErr = _showErr
         self.__i2c = self.__smbus.SMBus(port)
         self.__read_id_info()
         self.__reset_args()
@@ -62,7 +64,8 @@ class Ardpy:
         print('Number of functions : %d'%self.__num_funcs)
         print('Maximum number of function arguments : %d'%self.__max_arg_num)
         print('version of firmware(Ardpy.h) on Arduino : %s'%self.__str_ver_Ardpy)
-
+        
+        
     @property
     def device_id(self):
         '''
@@ -103,14 +106,6 @@ class Ardpy:
         처음부터(즉, 인자를 보내는 것 부터) 다시 수행할 수 있도록 하기 위함이다.
        ====================================================================
     """
-    def __reg_arg(self, index, dtype, lst_data):
-        if index >= self.__max_arg_num:
-            raise Exception('argument index must be lower than or equal to %d.'%self.__max_arg_num)
-        lst_pckt = [index, dtype]
-        lst_pckt.extend(lst_data)
-        self.__lst_args[index] = lst_pckt
-        #print('lst_pckt:%s'%lst_pckt)
-
     # 03/May/2016 replaced _send... funcs into the folllowing one func
     def _set_arg(self, val, index=0, type='byte'):
         """
@@ -239,6 +234,17 @@ class Ardpy:
                         dtype, ret, info = self.__read_data()
                         #print('info:%d'%info)
                         raise Exception('Unknown error(%d) occurred.(dev:0x%x)'%(stat, self.__addr))
+    
+    '''=================================================================
+    (internal) functions
+    ================================================================='''
+
+    def __reg_arg(self, index, dtype, lst_data):
+        if index >= self.__max_arg_num:
+            raise Exception('argument index must be lower than or equal to %d.'%self.__max_arg_num)
+        lst_pckt = [index, dtype]
+        lst_pckt.extend(lst_data)
+        self.__lst_args[index] = lst_pckt
 
     def __reset_args(self):
         """reset all the function argument(list) as None"""
@@ -307,24 +313,7 @@ class Ardpy:
     def __read_stat(self):
         res = self.__read_i2c_data(cmd = self.__CMD_READ_STAT, length =2)
         return res[0]
-
-    """====================================================================
-        __read_라고 되어있지만 사실 슬레이브에 데이터가 정상이라고 confirm 하는 기능을 함.
-        슬레이브에서는 아래와 같이 _stat 변수를 _STAT_UNDER_NORMAL_PROC 로 저장하고
-        바로 그 _stat변수값을 체크썸과 같이 넘겨주게 되어 있음
-        ----------------------------------------------------------
-		case _CMD_CHECK_OK:
-			_stat = _STAT_UNDER_NORMAL_PROC;
-			_statArr[0] = _stat;
-			_statArr[1]	=	0xff-(_CMD_CHECK_OK + _stat);
-			Wire.write( (const byte*)_statArr, 2);
-			break;
-       ====================================================================
-    """
-    def __read_confirm_ok(self):
-        res = self.__read_i2c_data(cmd = self.__CMD_CHECK_OK, length =2)
-        return res[0]
-
+    
     """====================================================================
         함수의 실행 반환값을 아두이노에서 읽어오는 기능을 함.
        ====================================================================
@@ -346,7 +335,19 @@ class Ardpy:
         lb_sum = total_sum.to_bytes(cnt, 'little')[0] #lowest byte
         return 0xff - lb_sum
 
-    # ok 신호를 보낸다.
+    """====================================================================
+        __read_라고 되어있지만 사실 슬레이브에 데이터가 정상이라고 confirm 하는 기능을 함.
+        슬레이브에서는 아래와 같이 _stat 변수를 _STAT_UNDER_NORMAL_PROC 로 저장하고
+        바로 그 _stat변수값을 체크썸과 같이 넘겨주게 되어 있음
+        ----------------------------------------------------------
+		case _CMD_CHECK_OK:
+			_stat = _STAT_UNDER_NORMAL_PROC;
+			_statArr[0] = _stat;
+			_statArr[1]	=	0xff-(_CMD_CHECK_OK + _stat);
+			Wire.write( (const byte*)_statArr, 2);
+			break;
+       ====================================================================
+    """
     def __noti_ok(self):
         notiSuccess = False     # 그리고 OK신호를 보낸다.
         tryCount = 0
@@ -356,6 +357,8 @@ class Ardpy:
                 notiSuccess = True
             else:
                 tryCount += 1
+                if self.__showErr:
+                    print( 'i2c (write) notifying OK error', tryCount)
                 if (tryCount >= self.__WAIT_COUNT):
                     raise Exception( 'i2c write noti_OK error.' )
 
@@ -384,7 +387,8 @@ class Ardpy:
                 writeSuccess = True     # 성공한 것으로 판단하고 빠져나간다.
             else:
                 tryCount += 1
-                print('%d: S%s, R%s'%(tryCount, orgn_data, sent_back))
+                if self.__showErr:
+                    print('%d: sent:%s, back:%s'%(tryCount, orgn_data, sent_back))
                 if (tryCount >= self.__WAIT_COUNT):
                     raise Exception( 'i2c data confirm error.' )
         self.__noti_ok()
@@ -410,6 +414,9 @@ class Ardpy:
             elif res != None:
                 readSuccess = True
 
+            if self.__showErr and not readSuccess:
+                print('i2c (read) checksum error:', tryCount)
+                
             #(통신은 이루어졌으나) 체크썸이 정해진 횟수 이상 불일치하면 예외 발생
             if (tryCount >= self.__WAIT_COUNT):
                 raise Exception('i2c read checksum error.')
@@ -427,23 +434,9 @@ class Ardpy:
     2. The i2c address is correct.
     3. Arduino(i2c slave) is properly working."""
 
-    '''
-    def __raw_i2c_read(self, cmd, length):
-        try:
-            res = self.__i2c.read_i2c_block_data(self.__addr, cmd, length)
-        except IOError: # hardware error
-            raise Exception( 'i2c read error.'+self.__i2c_err_msg )
-        return res
-    
-    def __raw_i2c_write(self, cmd, byte_list):
-        try: 
-            self.__i2c.write_i2c_block_data(self.__addr, cmd, byte_list)
-        except IOError:
-            raise Exception( 'i2c write error.'+self.__i2c_err_msg )
-    '''
-    # 즉, 위와 같이 예외 한 번에 머무면 실행이 도중에 멈추는 경우가 많다.
-    # 한 번 예외가 발생했다고 연결이 끊긴 것이 아닐 수 있기 때문이다.
     # smbus함수에서 예외가 한 번 발생했다하더라도 몇 번 더 시도해 보아야 한다.
+    # 즉, 예외 한 번에 멈추면 (드물게 발생하지만) 실행이 도중에 멈추는 경우가 있다.
+    # 한 번 예외가 발생했다고 연결이 완전히 끊긴 것이 아닐 수 있다는 얘기다.
     # 따라서 반드시 아래와 같이 몇 번 더 시도해 보고 계속 예외가 발생하면 그때 멈춘다.
     
     def __raw_i2c_read(self, cmd, length):
@@ -456,6 +449,8 @@ class Ardpy:
                 readSuccess = True
             except IOError: # hardware error
                 tryCount += 1
+                if self.__showErr:
+                    print('i2c raw read error')
                 if (tryCount >= self.__WAIT_I2C_COUNT):
                     raise Exception( 'i2c read error. '+self.__i2c_err_msg )
         return res
@@ -469,5 +464,7 @@ class Ardpy:
                 writeSuccess = True
             except IOError:
                 tryCount += 1
+                if self.__showErr:
+                    print('i2c raw write error')
                 if (tryCount >= self.__WAIT_I2C_COUNT):
                     raise Exception( 'i2c write error. '+self.__i2c_err_msg )
