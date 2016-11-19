@@ -372,7 +372,7 @@ void _HRP_::_onReceive(int count) { //static function
     } else { // smbus.read_i2c_block_data() 호출인 경우
         // 17Nov2016 아래 지연코드가 있으면 통신오류가 많이 줄어든다.
         // 이유를 모르겠다. 다만 주로 read 에서 오류가 발생하는 걸 보니
-        // RPi의 i2c stretching clk bug 와 관련이 있겠거니 짐작만.
+        // RPi의 i2c stretching sclk bug 와 관련이 있겠거니 짐작만.
         delayMicroseconds(300); //min: 200
     }
     
@@ -413,6 +413,7 @@ void _HRP_::_onRequest() {
             // 이유를 짐작해보면 Wire.write()함수를 수행하는 도중에 onReceive()가
             // 호출되어 )_rcvBuf, _idx 내용이 바뀔 수도 있지 않을까 싶다.
             // 따라서 아래와 같이 Wire.write()함수에 _rcvBuf를 넘겨주면 안된다.
+            // 19Nov2016 그냥 아래와 같이 해도 되는 것 같다.
             Wire.write( (const byte*)_rcvBuf, _idx);
             return;
 
@@ -424,8 +425,8 @@ void _HRP_::_onRequest() {
 			_statArr[1]	= 249;
 			Wire.write( (const byte*)_statArr, 2);
             // 19Nov2016 ISR은 단순하게 유지해야 하으므로
-            // 아래는 loop() 안에서 사용자가 추가하는 것으로 한다.
-            //check();//<- place here instead of in loop() function ***
+            //  아래는 loop() 안에서 사용자가 추가하는 것으로 한다.
+            // check();//<- place here instead of in loop() function ***
 			return;
 
 		case _CMD_READ_STAT:
@@ -436,10 +437,12 @@ void _HRP_::_onRequest() {
 
 		case _CMD_READ_DATA:
 			_checksum = _CMD_READ_DATA;
-			for(_idx=0; _idx<__RET_DATA_LENGTH__-1; _idx++)
+			//for(_idx=0; _idx<__RET_DATA_LENGTH__-1; _idx++)
+			for(_idx=0; _idx < sizeof(_S_Ret) - 1; _idx++)
 				_checksum += _u_ret.byArr[_idx];
 			_u_ret.s_ret.checksum = 0xff - _checksum;
-			Wire.write( (const byte*)_u_ret.byArr, __RET_DATA_LENGTH__ );
+			//Wire.write( (const byte*)_u_ret.byArr, __RET_DATA_LENGTH__ );
+			Wire.write( (const byte*)_u_ret.byArr, sizeof(_S_Ret) );
 			return;
 
 		case _CMD_READ_ID:

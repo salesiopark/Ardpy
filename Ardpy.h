@@ -11,7 +11,7 @@
 //  이 숫자는 2바이트로 묶여서 전송된다.
 #define __VER_ARDPY_A 1 //max 255
 #define __VER_ARDPY_B 2 //max 15
-#define __VER_ARDPY_C 0 //max 15
+#define __VER_ARDPY_C 1 //max 15
 #include "Arduino.h"
 
 typedef void(*pfunc_t)(void);
@@ -49,7 +49,7 @@ class _HRP_ {
 
     private:
         enum _E_IN { // invariable numbers i.e. constants
-            __RET_DATA_LENGTH__ = 7,
+            //__RET_DATA_LENGTH__ = 7,
             __EEPROM_ADDR__     = 1, // eeprom addr for storing i2c addr
             __MIN_I2C_ADDR__    = 3,
             __MAX_I2C_ADDR__    = 119,
@@ -160,7 +160,8 @@ class _HRP_ {
 
         union _U_Ret {
             volatile _S_Ret         s_ret;
-            volatile byte           byArr [ __RET_DATA_LENGTH__ ];
+            //volatile byte           byArr [ __RET_DATA_LENGTH__ ];
+            volatile byte           byArr [ sizeof(_S_Ret) ];
 		};
 
 		// data structure for the device id (ulong) -------------------
