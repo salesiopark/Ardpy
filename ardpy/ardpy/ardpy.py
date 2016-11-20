@@ -394,7 +394,7 @@ class Ardpy:
                 len(byte_list)+2, # cmd, checksum까지 포함한 길이
             )
             #print('back_data << lst:%s'%sent_back)
-            if sent_back[:-1] == orgn_data:  # 보낸 것과 받은 것이 같은 경우에만
+            if sent_back == orgn_data:  # 보낸 것과 받은 것이 같은 경우에만
                 writeSuccess = True     # 성공한 것으로 판단하고 빠져나간다.
             else:
                 tryCount += 1
@@ -430,13 +430,15 @@ class Ardpy:
             #(통신은 이루어졌으나) 체크썸이 정해진 횟수 이상 불일치하면 예외 발생
             if (tryCount >= self.__WAIT_COUNT):
                 raise Exception('i2c read checksum error.')
-        return res
+        #checksum은 빼고 전송한다.
+        return res[:-1]
     
     """===========================================================
     smbus 객체를 직접 접근하는 가장 하위의 통신함수들
         여기에서 예외가 발생하면 주소나 하드웨어가 잘못 되었을 가능성이 크다.
         정해진 횟수만큼 기다린 다음 계속 오류가 나면 예회를 발생하고 해당 문구를 출력한다.
     ===========================================================
+    아래 
     """
     
     __i2c_err_msg = """Check the followings:
