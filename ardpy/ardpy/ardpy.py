@@ -1,6 +1,6 @@
 class Ardpy:
     # version
-    _VERSION = '1.1.4'
+    _VERSION = '1.1.5'
     
     # command constant to arduino
     __CMD_READ_DATA   = 0
@@ -391,12 +391,10 @@ class Ardpy:
             # 보냈던 데이터를 그대로 다시 받는다
             sent_back = self.__read_i2c_data(
                 self.__CMD_SEND_BACK,
-                len(byte_list)+1, # cmd까지 포함한 길이
-                checksum=False
+                len(byte_list)+2, # cmd, checksum까지 포함한 길이
             )
-            
             #print('back_data << lst:%s'%sent_back)
-            if sent_back == orgn_data:  # 보낸 것과 받은 것이 같은 경우에만
+            if sent_back[:-1] == orgn_data:  # 보낸 것과 받은 것이 같은 경우에만
                 writeSuccess = True     # 성공한 것으로 판단하고 빠져나간다.
             else:
                 tryCount += 1
@@ -411,22 +409,21 @@ class Ardpy:
         아두이노에서 체크썸을 끝에다가 붙여서 오기 때문에 그것으로 데이터가 정상인지 판단한다.
         단 보낸 데이터를 받는 경우에는 체크썸을 사용하지 않는다. (checksum = False)
        ====================================================================
+    20/Nov/2016 읽어오는 모든 경우에 checksum을 사용한다.
     """
-    def __read_i2c_data(self, cmd, length, checksum=True):
+    #def __read_i2c_data(self, cmd, length, checksum=True):
+    def __read_i2c_data(self, cmd, length):
         readSuccess = False
         tryCount = 0
-        res = None
+        #res = None
         while not readSuccess:
             tryCount += 1
             res = self.__raw_i2c_read(cmd, length)
-            if checksum: #체크썸을 사용하는 경우
-                #res리스트의 마지막 요소가 checksum 이다.
-                # 계산된 체크섬과 일치하면 성공으로 간주
-                readSuccess = ( res[-1] == self.__checksum(res[:-1], cmd = cmd) )
-                #print('rd_data (cmd:%d) << res:%s, csum:%s, cnt:%d'%(cmd, res, csum, tryCount))
-            elif res != None:
-                readSuccess = True
-
+            #res리스트의 마지막 요소(res[-1])가 slave에서 계산된 checksum
+            # 계산된 체크섬과 일치하면 성공으로 간주
+            readSuccess = ( res[-1] == self.__checksum(res[:-1], cmd = cmd) )
+            #print('rd_data (cmd:%d) << res:%s, csum:%s, cnt:%d'%(cmd, res, csum, tryCount))
+            
             if self.__showErr and not readSuccess:
                 print('i2c (read) checksum error:', tryCount)
                 

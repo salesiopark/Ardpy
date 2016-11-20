@@ -1,4 +1,16 @@
+ardpy.py version 1.1.5
+    __CMD_SEND_BACK 의 경우에도 checksumd을 붙여서 전송하도록 수정
+        실험결과 (master->slave) 전송은 거의 오류가 없고 그 반대에서 주로 오류가 발생한다.
+        이렇게 변경한 이유는  데이터는 제대로 갔는데 단순히 다시 읽어오는데 오류가 발생한 경우에
+        원데이터를 다시 보내지 않고 한 번 더 받아오도록 해서
+        쓸데없는 재전송(master->slave)을 방지하기 위함이다.
+        만약 체크썸도 이상이 없는데 원본과 다른 경우에만 원본을 다시 보낸다.
+        이것으로 master<-slave 의 모든 경우에 checksum을 이용한다.
+    
+Ardpy.h version 1.2.3
+    __CMD_SEND_BACK의 경우에도 checksumd을 붙여서 전송하도록 수정
+
 Ardpy.h version 1.2.2
     _VER(a,b,c) 매크로를 정의하여 버전에서 uint16_t 데이터를 계산
-    Ardpy.h와 firmware의 버전을 따로 전송하도록 _S_Id 구조를 변경
+    Ardpy.h와 (user)firmware의 버전을 따로 전송하도록 _S_Id 구조를 변경(추가)
     Ardpy.check()함수의 세 번째 인수를 firmware 버전으로 설정 가능(default=1.0.0)

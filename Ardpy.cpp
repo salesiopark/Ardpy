@@ -372,7 +372,7 @@ void _HRP_::_onReceive(int count) { //static function
             #endif //##################################
         }
         return;
-    } else { // smbus.read_i2c_block_data() 호출인 경우
+    } else { //<- smbus.read_i2c_block_data() 호출인 경우
         // 17Nov2016 아래 지연코드가 있으면 통신오류가 많이 줄어든다.
         // 이유를 모르겠다. 다만 주로 read 에서 오류가 발생하는 걸 보니
         // RPi의 i2c stretching sclk bug 와 관련이 있겠거니 짐작만.
@@ -402,19 +402,10 @@ void _HRP_::_onRequest() {
                 Serial.println("]");
             #endif //##################################
             
-            // _idx(==__len__)는 직전 데이터의 길이가 기록되어 있다.
-            // 18/Nov/2016 아래와 같이 _rcvBuf를 미리 복사해서 
-            // 이것을 Wire.write()에 넘겨주어야 통신 오류가 억제된다.
-            /*
-            __len__ = _idx;
-            for(byte k=0; k<__len__; k++) {
-                __sbuf__[k]=_rcvBuf[k];
-            }
-            Wire.write( (const byte*)__sbuf__, __len__);
-            //*/
+            // _idx는 직전 데이터의 길이가 기록되어 있다.
             
             ///*
-            _checksum = 0;
+            _checksum = _CMD_SEND_BACK;
             for(byte k=0; k<_idx; k++) {
                 _checksum += _rcvBuf[k];
             }
@@ -424,15 +415,15 @@ void _HRP_::_onRequest() {
             // 이유를 짐작해보면 Wire.write()함수를 수행하는 도중에 onReceive()가
             // 호출되어 )_rcvBuf, _idx 내용이 바뀔 수도 있지 않을까 싶다.
             // 따라서 아래와 같이 Wire.write()함수에 _rcvBuf를 넘겨주면 안된다.
-            // 19Nov2016 그냥 아래와 같이 해도 되는 것 같다.
-            Wire.write( (const byte*)_rcvBuf, _idx);
+            // 19Nov2016 (위의 짐작과 틀리게)그냥 아래와 같이 해도 되는 것 같다.
+            // 20Nov2016 끝에 checksum을 붙여서 보낸다.
+            Wire.write( (const byte*)_rcvBuf, _idx+1);
             return;
 
 		case _CMD_CHECK_OK:
 			_stat = _STAT_UNDER_NORMAL_PROC;//0
 			_statArr[0] = _stat;
-			//_statArr[1]	= 0xff-(_CMD_CHECK_OK + _stat); 
-            // checksum = 255-(6+0)
+			//_statArr[1]=0xff-(_CMD_CHECK_OK+_stat);//255-(6+0)=249
 			_statArr[1]	= 249;
 			Wire.write( (const byte*)_statArr, 2);
             // 19Nov2016 ISR은 단순하게 유지해야 하으므로
