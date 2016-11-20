@@ -407,15 +407,12 @@ class Ardpy:
     """====================================================================
         아두이노에서 데이터를 읽어온다.
         아두이노에서 체크썸을 끝에다가 붙여서 오기 때문에 그것으로 데이터가 정상인지 판단한다.
-        단 보낸 데이터를 받는 경우에는 체크썸을 사용하지 않는다. (checksum = False)
-       ====================================================================
-    20/Nov/2016 읽어오는 모든 경우에 checksum을 사용한다.
+    20/Nov/2016:읽어오는 모든 경우에 checksum을 사용한다.
+    ====================================================================
     """
-    #def __read_i2c_data(self, cmd, length, checksum=True):
     def __read_i2c_data(self, cmd, length):
         readSuccess = False
         tryCount = 0
-        #res = None
         while not readSuccess:
             tryCount += 1
             res = self.__raw_i2c_read(cmd, length)
@@ -430,17 +427,16 @@ class Ardpy:
             #(통신은 이루어졌으나) 체크썸이 정해진 횟수 이상 불일치하면 예외 발생
             if (tryCount >= self.__WAIT_COUNT):
                 raise Exception('i2c read checksum error.')
-        #checksum은 빼고 전송한다.
+        # 20/NOV/2016 checksum은 빼고 전송한다.
         return res[:-1]
     
     """===========================================================
-    smbus 객체를 직접 접근하는 가장 하위의 통신함수들
-        여기에서 예외가 발생하면 주소나 하드웨어가 잘못 되었을 가능성이 크다.
+    smbus 객체를 직접 접근하는 가장 하위의 통신 함수들
+        여기에서 예외가 발생하면 주소나 *하드웨어가 잘못 되었을 가능성*이 크다.
         정해진 횟수만큼 기다린 다음 계속 오류가 나면 예회를 발생하고 해당 문구를 출력한다.
     ===========================================================
-    아래 
+        아래 문구는 hardware 오류가 났을 때 체크해볼 것들을 보여주는 것이다.
     """
-    
     __i2c_err_msg = """Check the followings:
     1. The interface circuit is correctily wired.
     2. The i2c address is correct.
