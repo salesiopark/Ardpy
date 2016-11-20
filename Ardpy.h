@@ -7,29 +7,33 @@
 #ifndef __ARDPY_H__
 #define __ARDPY_H__
 
-// firmward(Ardpy)의 버전을 표시한다. ver A.B.C
+//======================================================================
+// Ardpy의 버전을 firmware에 기록하기 위한 상수들
+// ver A.B.C
 //  이 숫자는 2바이트로 묶여서 전송된다.
-#define __VER_ARDPY_A 1 //max 255
-#define __VER_ARDPY_B 2 //max 15
-#define __VER_ARDPY_C 1 //max 15
+#define __V_APY_A__ 1 //max:15
+#define __V_APY_B__ 2 //max:63
+#define __V_APY_C__ 3 //max:63
+//======================================================================
 #include "Arduino.h"
 
-typedef void(*pfunc_t)(void);
-
+#define __VER__(a,b,c) ((uint16_t)((uint16_t)(a)<<12|(uint16_t)(b)<<6|(uint16_t)(c)))
 #define __INIT_MAX_ARG_NUM__ 		4
 #define __STR_BUF_LENGTH__			32
 #define __MAX_I2C_READ_BUF_LEN__	32
 
+typedef void(*pfunc_t)(void);
+
 class _HRP_ {
     public:
-        static byte         begin(byte addr, uint32_t dev_id = 0xffffffff);
+        static byte         begin(byte addr, uint32_t dev_id = 0xffffffff, uint16_t ver_firmw=0x1000);
         static void         check();
         static void         add_func( void (*func)(void) );
         static void         set_max_arg_num(byte num);
   
-        static int8_t       get_int8(byte index=0);
-        static uint8_t      get_uint8(byte index=0);
-        static int16_t      get_int16(byte index=0);
+        static int8_t       get_int8(byte index = 0);
+        static uint8_t      get_uint8(byte index = 0);
+        static int16_t      get_int16(byte index = 0);
         static uint16_t     get_uint16(byte index = 0);
         static int32_t      get_int32(byte index = 0);
         static uint32_t     get_uint32(byte index = 0);
@@ -169,17 +173,17 @@ class _HRP_ {
         // use the info for check validity of number of args and functions
         // thus it needs no checking those in arduino code
         struct _S_Id {
-            uint32_t        val;
+            uint32_t        dev_id; // device id
             byte            numArgs; // maximnum arg num
             byte            numFuncs;// number of functions
-            byte            verA;
-            byte            verBC;
+            uint16_t        verArdpy;// version of Ardpy.h
+            uint16_t        verFirmw;// version of user firmware
             byte            checksum;
 		};
 
         union _U_Id {
             _S_Id           s_id;
-            byte            byArr[9];
+            byte            byArr[sizeof(_S_Id)];
 		};
 
         static void             _onRequest();
@@ -204,10 +208,9 @@ class _HRP_ {
         volatile static _S_Arg* _args;  // struct for function args
 
         static char             _strBuf[ __STR_BUF_LENGTH__ ];
-
         static byte             _max_arg_num;
 
-		//tmp varialbes
+		// 임시 변수들
         static byte             _checksum;
         static byte             _idx;
 }; // closing of *class _HRP_*

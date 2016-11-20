@@ -1,0 +1,4 @@
+Ardpy.h version 1.2.2
+    _VER(a,b,c) 매크로를 정의하여 버전에서 uint16_t 데이터를 계산
+    Ardpy.h와 firmware의 버전을 따로 전송하도록 _S_Id 구조를 변경
+    Ardpy.check()함수의 세 번째 인수를 firmware 버전으로 설정 가능(default=1.0.0)

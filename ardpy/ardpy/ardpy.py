@@ -1,6 +1,6 @@
 class Ardpy:
     # version
-    _VERSION = '1.1.3'
+    _VERSION = '1.1.4'
     
     # command constant to arduino
     __CMD_READ_DATA   = 0
@@ -63,7 +63,8 @@ class Ardpy:
         print('Ardpy device (addr:0x%x, device id:%d) ready.'%(addr, self.__id))
         print('Number of functions : %d'%self.__num_funcs)
         print('Maximum number of function arguments : %d'%self.__max_arg_num)
-        print('version of firmware(Ardpy.h) on Arduino : %s'%self.__str_ver_Ardpy)
+        print('version of "Ardpy.h" on slave(Arduino) : %s'%self.__str_ver_Ardpy)
+        print('version of firmware on slave(Arduino) : %s'%self.__str_ver_firmw)
         
         
     @property
@@ -254,16 +255,28 @@ class Ardpy:
 
     def __read_id_info(self):
         """read id, max_arg_num and num_funcs from Ardpy device"""
-        info = self.__read_i2c_data(cmd=self.__CMD_READ_ID, length = 9)
+        info = self.__read_i2c_data(cmd=self.__CMD_READ_ID, length = 11)
         self.__id = self.__struct.unpack('L', bytes(info[0:4]))[0]
         self.__max_arg_num = info[4]
         self.__num_funcs = info[5]
         #18/Nov/2016 Ardpy의 버전을 받아오도록 했다.
-        print('info[7]',info[7])
-        self.__vera_firmware = info[6]
-        self.__verb_firmware = int(info[7]/16)
-        self.__verc_firmware = info[7]%16
-        self.__str_ver_Ardpy = "%d.%d.%d"%(info[6],int(info[7]/16),info[7]%16)
+        #print('info[7]',info[7])
+        #self.__vera_firmware = info[6]
+        #self.__verb_firmware = int(info[7]/16)
+        #self.__verc_firmware = info[7]%16
+        #self.__str_ver_Ardpy = "%d.%d.%d"%(info[6],int(info[7]/16),info[7]%16)
+        self.__ver_apy = (self.__struct.unpack('H', bytes(info[6:8])))[0]
+        self.__ver_firmw = (self.__struct.unpack('H', bytes(info[8:10])))[0]
+        self.__str_ver_Ardpy = "%d.%d.%d"%(
+            int(self.__ver_apy/(2**12)),
+            int((self.__ver_apy%(2**12))/(2**6)),
+            int(self.__ver_apy%(2**12)%(2**6))
+        )
+        self.__str_ver_firmw = "%d.%d.%d"%(
+            int(self.__ver_firmw/(2**12)),
+            int((self.__ver_firmw%(2**12))/(2**6)),
+            int(self.__ver_firmw%(2**12)%(2**6))
+        )
 
     """====================================================================
         __lst_args 리스트에 저장한 인자를 하나씩 꺼내서 전송한다.
@@ -376,12 +389,12 @@ class Ardpy:
         while not writeSuccess:
             self.__raw_i2c_write(cmd, byte_list)
             # 보냈던 데이터를 그대로 다시 받는다
-            #lenData = len(byte_list)+1 # cmd까지 포함한 길이
             sent_back = self.__read_i2c_data(
                 self.__CMD_SEND_BACK,
                 len(byte_list)+1, # cmd까지 포함한 길이
                 checksum=False
             )
+            
             #print('back_data << lst:%s'%sent_back)
             if sent_back == orgn_data:  # 보낸 것과 받은 것이 같은 경우에만
                 writeSuccess = True     # 성공한 것으로 판단하고 빠져나간다.

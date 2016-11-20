@@ -93,18 +93,21 @@ void _HRP_::set_ret(float fVal) {
 
 // public methods definition ------------------------------------------------------
 
-byte _HRP_::begin(byte addr, uint32_t dev_id) {
+byte _HRP_::begin(byte addr, uint32_t dev_id, uint16_t ver_firmw) {
 	// store id and some infos
-	_u_id.s_id.val = dev_id;
+	_u_id.s_id.dev_id = dev_id;
 	_u_id.s_id.numArgs = _max_arg_num;
 	_u_id.s_id.numFuncs = _num_funcs;
-    _u_id.s_id.verA = (byte)(__VER_ARDPY_A);
-    _u_id.s_id.verBC = (byte)(__VER_ARDPY_B<<4)+__VER_ARDPY_C;
+    _u_id.s_id.verArdpy = __VER__(__V_APY_A__,__V_APY_B__,__V_APY_C__);
+    _u_id.s_id.verFirmw = ver_firmw;
 	
     // 체크썸(_u_id.byArr[6])을 계산 
     _u_id.s_id.checksum = 0xff - (byte)( _CMD_READ_ID
         + _u_id.byArr[0] + _u_id.byArr[1] + _u_id.byArr[2] + _u_id.byArr[3]
-        + _u_id.byArr[4] + _u_id.byArr[5] + _u_id.byArr[6] + _u_id.byArr[7]
+        + _u_id.byArr[4]
+        + _u_id.byArr[5]
+        + _u_id.byArr[6] + _u_id.byArr[7]
+        + _u_id.byArr[8] + _u_id.byArr[9]
     );
 
 	// if addr in EEPROM is valid, use that.
@@ -373,7 +376,7 @@ void _HRP_::_onReceive(int count) { //static function
         // 17Nov2016 아래 지연코드가 있으면 통신오류가 많이 줄어든다.
         // 이유를 모르겠다. 다만 주로 read 에서 오류가 발생하는 걸 보니
         // RPi의 i2c stretching sclk bug 와 관련이 있겠거니 짐작만.
-        delayMicroseconds(300); //min: 200
+        delayMicroseconds(200); //opt:500 min: 200
     }
     
     #ifdef __DEBUG__ //###########################
@@ -384,7 +387,7 @@ void _HRP_::_onReceive(int count) { //static function
     // 이 시점에서 _idx에는 받은 데이터(cmd포함)의 길이가 남는다.
 }
 
-//volatile byte __len__;
+volatile byte __csu;
 void _HRP_::_onRequest() { 
     switch(_cmd_i2c) {
         case _CMD_SEND_BACK:
@@ -408,6 +411,14 @@ void _HRP_::_onRequest() {
                 __sbuf__[k]=_rcvBuf[k];
             }
             Wire.write( (const byte*)__sbuf__, __len__);
+            //*/
+            
+            ///*
+            _checksum = 0;
+            for(byte k=0; k<_idx; k++) {
+                _checksum += _rcvBuf[k];
+            }
+            _rcvBuf[_idx] = 0xff - _checksum;
             //*/
             
             // 이유를 짐작해보면 Wire.write()함수를 수행하는 도중에 onReceive()가
@@ -437,11 +448,9 @@ void _HRP_::_onRequest() {
 
 		case _CMD_READ_DATA:
 			_checksum = _CMD_READ_DATA;
-			//for(_idx=0; _idx<__RET_DATA_LENGTH__-1; _idx++)
 			for(_idx=0; _idx < sizeof(_S_Ret) - 1; _idx++)
 				_checksum += _u_ret.byArr[_idx];
 			_u_ret.s_ret.checksum = 0xff - _checksum;
-			//Wire.write( (const byte*)_u_ret.byArr, __RET_DATA_LENGTH__ );
 			Wire.write( (const byte*)_u_ret.byArr, sizeof(_S_Ret) );
 			return;
 

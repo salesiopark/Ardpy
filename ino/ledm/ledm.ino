@@ -3,9 +3,9 @@
 ************************************************************************/
 #define __VER_LEDM_A 1
 #define __VER_LEDM_B 0
-#define __VER_LEDM_C 0
+#define __VER_LEDM_C 1
 //======================================================================
-#include <Wire.h> // must be included befor Ardpy.h
+//#include <Wire.h> // must be included befor Ardpy.h
 #include <Ardpy.h>
 
 #define X0 A0
@@ -97,6 +97,12 @@ void setup() {
     Ardpy.add_func(setall);// _exec_func(3)
 
 	Ardpy.begin(0x11, 101);
+    
+    /*
+    Serial.begin(115200);
+    Serial.println(_VER(1,1,1),HEX);
+    Serial.println(_VER(1,1,1),BIN);
+    */
 }
 
 byte col = 0;
