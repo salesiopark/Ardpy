@@ -1,3 +1,6 @@
+ardpy.py version 1.1.6
+    Ardpy.__wait_until_cmd_handled(self) 함수 개선(__read_stat()함수와 통함)
+
 ardpy.py version 1.1.5
     __CMD_SEND_BACK 의 경우에도 checksumd을 붙여서 전송하도록 수정
         실험결과 (master->slave) 전송은 거의 오류가 없고 그 반대에서 주로 오류가 발생한다.

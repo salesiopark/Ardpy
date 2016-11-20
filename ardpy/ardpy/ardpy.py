@@ -1,6 +1,6 @@
 class Ardpy:
     # version
-    _VERSION = '1.1.5'
+    _VERSION = '1.1.6'
     
     # command constant to arduino
     __CMD_READ_DATA   = 0
@@ -315,18 +315,15 @@ class Ardpy:
             tmElapsed = self.__datetime.datetime.now() - tmStart
             if (tmElapsed.total_seconds() > self.__TIMEOUT):
                 raise Exception('Timeout for waiting device ready.')
-            stat = self.__read_stat()
+            #stat = self.__read_stat()
+            #cmd_completed = ( stat != self.__STAT_UNDER_NORMAL_PROC )
+            stat = self.__read_i2c_data(
+                cmd = self.__CMD_READ_STAT,
+                length =2   # [stat, checksum]
+            )[0]            # 첫 번째 요소만 추출
             cmd_completed = ( stat != self.__STAT_UNDER_NORMAL_PROC )
         return stat
 
-    """====================================================================
-        슬레이브에서 stat 값을 읽는다.
-       ====================================================================
-    """
-    def __read_stat(self):
-        res = self.__read_i2c_data(cmd = self.__CMD_READ_STAT, length =2)
-        return res[0]
-    
     """====================================================================
         함수의 실행 반환값을 아두이노에서 읽어오는 기능을 함.
        ====================================================================
