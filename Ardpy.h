@@ -7,17 +7,10 @@
 #ifndef __ARDPY_H__
 #define __ARDPY_H__
 
-//======================================================================
-// Ardpy의 버전을 firmware에 기록하기 위한 상수들
-// ver A.B.C
-//  이 숫자는 2바이트로 묶여서 전송된다.
-#define __V_APY_A__ 1 //max:15
-#define __V_APY_B__ 2 //max:63
-#define __V_APY_C__ 3 //max:63
-//======================================================================
+#define __VER__(a,b,c) ((uint16_t)((uint16_t)(a)<<12|(uint16_t)(b)<<6|(uint16_t)(c)))
+
 #include "Arduino.h"
 
-#define __VER__(a,b,c) ((uint16_t)((uint16_t)(a)<<12|(uint16_t)(b)<<6|(uint16_t)(c)))
 #define __INIT_MAX_ARG_NUM__ 		4
 #define __STR_BUF_LENGTH__			32
 #define __MAX_I2C_READ_BUF_LEN__	32

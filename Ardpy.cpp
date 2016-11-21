@@ -4,8 +4,7 @@
 * by salesiopark(박장현, 국립목포대학교, 전기제어공학과)
 * <Wire.h> must be included before including <Ardpy.h> in user .ino file
 ************************************************************************/
-//#define __DEBUG__
-
+#define __VER_ARDPY__ __VER__(1,1,4)
 // includes ------------------------------------------------------------------
 #include "Ardpy.h"
 #include "Wire.h"
@@ -98,7 +97,8 @@ byte _HRP_::begin(byte addr, uint32_t dev_id, uint16_t ver_firmw) {
 	_u_id.s_id.dev_id = dev_id;
 	_u_id.s_id.numArgs = _max_arg_num;
 	_u_id.s_id.numFuncs = _num_funcs;
-    _u_id.s_id.verArdpy = __VER__(__V_APY_A__,__V_APY_B__,__V_APY_C__);
+    //_u_id.s_id.verArdpy = __VER__(__V_APY_A__,__V_APY_B__,__V_APY_C__);
+    _u_id.s_id.verArdpy = __VER_ARDPY__;
     _u_id.s_id.verFirmw = ver_firmw;
 	
     // 체크썸(_u_id.byArr[6])을 계산 

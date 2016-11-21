@@ -237,7 +237,7 @@ class Ardpy:
                         raise Exception('Unknown error(%d) occurred.(dev:0x%x)'%(stat, self.__addr))
     
     '''=================================================================
-    (internal) functions
+    (internal) functions from here
     ================================================================='''
 
     def __reg_arg(self, index, dtype, lst_data):
