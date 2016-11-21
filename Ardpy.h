@@ -6,15 +6,9 @@
 ************************************************************************/
 #ifndef __ARDPY_H__
 #define __ARDPY_H__
-
-#define __VER__(a,b,c) ((uint16_t)((uint16_t)(a)<<12|(uint16_t)(b)<<6|(uint16_t)(c)))
-
 #include "Arduino.h"
-
-#define __INIT_MAX_ARG_NUM__ 		4
-#define __STR_BUF_LENGTH__			32
-#define __MAX_I2C_READ_BUF_LEN__	32
-
+// 세자리 버전 번호를 uint16_t 데이터로 변환하는 매크로
+#define __VER__(a,b,c) ((uint16_t)((uint16_t)(a)<<12|(uint16_t)(b)<<6|(uint16_t)(c)))
 typedef void(*pfunc_t)(void);
 
 class _HRP_ {
@@ -46,22 +40,25 @@ class _HRP_ {
 
     private:
         enum _E_IN { // invariable numbers i.e. constants
-            __EEPROM_ADDR__     = 0, // eeprom addr for storing i2c addr
-            __MIN_I2C_ADDR__    = 3,
-            __MAX_I2C_ADDR__    = 119,
+            __EEPROM_ADDR__         = 0, // eeprom addr for storing i2c addr
+            __MIN_I2C_ADDR__        = 3,
+            __MAX_I2C_ADDR__        = 119,
+            __INIT_MAX_ARG_NUM__    = 4,
+            __STR_BUF_LEN__	        = 31,
+            __I2C_READ_BUF_LEN__    = 32
 		};
 
         enum _E_DTYPE {
             _DTYPE_NONE     = 0,
             _DTYPE_INT8     = 2, //_DATA_SBYTE
 			_DTYPE_UINT8	= 3, //_DATA_BYTE
-			//_DTYPE_BOOL = 4,
+			//_DTYPE_BOOL   = 4, // 삭제
             _DTYPE_INT16    = 5,
             _DTYPE_UINT16   = 6, //_DATA_USHORT
             _DTYPE_INT32    = 7, //_DATA_LONG
             _DTYPE_UINT32   = 8, //_DATA_ULONG
             _DTYPE_FLOAT    = 9, //_DATA_FLOAT
-			//_DTYPE_DOUBLE	= 10,
+			//_DTYPE_DOUBLE	= 10,  //삭제
 			_DTYPE_STR		= 11, //_DATA_STR
 		};
 
@@ -185,10 +182,9 @@ class _HRP_ {
 
         volatile static byte    _stat;
         volatile static byte    _statArr[2];
-        volatile static byte    _cmd; // command from master device
+        volatile static byte    _cmd;     // command from master device
         volatile static byte    _cmd_i2c; // command from master device
-        volatile static byte    _rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ];
-        //volatile static byte    __sbuf__[ __MAX_I2C_READ_BUF_LEN__ ];
+        volatile static byte    _rcvBuf[ __I2C_READ_BUF_LEN__ ];
 
         static pfunc_t*         _tmpFuncArr;
         static pfunc_t*         _funcArr; //__funcs_i2c__;
@@ -199,7 +195,7 @@ class _HRP_ {
         volatile static _U_Ret  _u_ret; // union for ret value
         volatile static _S_Arg* _args;  // struct for function args
 
-        static char             _strBuf[ __STR_BUF_LENGTH__ ];
+        static char             _strBuf[ __STR_BUF_LEN__ ];
         static byte             _max_arg_num;
 
 		// 임시 변수들
@@ -207,7 +203,7 @@ class _HRP_ {
         static byte             _idx;
 }; // closing of *class _HRP_*
 
-// define externally used object name as Harper
+// define externally used object name as Ardpy
 extern _HRP_    Ardpy;
 
 #endif

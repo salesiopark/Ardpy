@@ -6,7 +6,7 @@
 ************************************************************************/
 //#define __DEBUG__
 //----------------------------------------------------------------------------
-#define __VER_ARDPY__ __VER__(1,1,4)
+#define __VER_ARDPY__ __VER__(1,1,5)
 // includes ------------------------------------------------------------------
 #include "Ardpy.h"
 #include <Wire.h>
@@ -16,10 +16,10 @@
 _HRP_::_U_Id            _HRP_::_u_id = {0xffffffff, };
 volatile byte           _HRP_::_cmd = 0 ;
 volatile byte           _HRP_::_cmd_i2c = 0 ;
-volatile byte           _HRP_::_rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
+volatile byte           _HRP_::_rcvBuf[ __I2C_READ_BUF_LEN__ ] = {0,};
 byte                    _HRP_::_idx = 0;
 volatile _HRP_::_U_Ret  _HRP_::_u_ret = {{1,} };
-char                    _HRP_::_strBuf[ __STR_BUF_LENGTH__ ] = {0,};
+char                    _HRP_::_strBuf[ __STR_BUF_LEN__ ] = {0,};
 byte                    _HRP_::_checksum = 0;
 volatile byte           _HRP_::_stat = 0;
 volatile byte           _HRP_::_statArr[2]={0,};
@@ -321,7 +321,7 @@ void _HRP_:: check() {
 
 					case _DTYPE_STR:
 						_args[index].type = _DTYPE_STR;
-						for ( _idx=0; _idx < __STR_BUF_LENGTH__  ; _idx++) {
+						for ( _idx=0; _idx < __STR_BUF_LEN__  ; _idx++) {
 							_strBuf[_idx]= _rcvBuf[_idx+3];
 							if ( _strBuf [_idx] == 0 ) break;
 						}

@@ -1,6 +1,6 @@
 class Ardpy:
     # version
-    _VERSION = '1.1.7'
+    _VERSION = '1.1.8'
     
     # command constant to arduino
     __CMD_READ_DATA   = 0
@@ -60,12 +60,9 @@ class Ardpy:
         self.__i2c = self.__smbus.SMBus(port)
         self.__read_id_info()
         self.__reset_args()
-        print('Ardpy device (addr:0x%x, device id:%d) ready.'%(addr, self.__id))
-        print('Number of functions : %d'%self.__num_funcs)
-        print('Maximum number of function arguments : %d'%self.__max_arg_num)
-        print('version of "Ardpy.h" on slave(Arduino) : %s'%self.__str_ver_Ardpy)
-        print('version of firmware on slave(Arduino) : %s'%self.__str_ver_firmw)
-        
+        print('Ardpy device with address 0x%x and id:%d ready.'%(addr, self.__id))
+        print('Number of functions:%d, max number of function args:%d '%(self.__num_funcs, self.__max_arg_num))
+        print('Firmware ver. %s ("Ardpy.h" ver. %s)'%(self.__str_ver_firmw, self.__str_ver_Ardpy))
         
     @property
     def device_id(self):
@@ -98,11 +95,11 @@ class Ardpy:
         self.__wait_until_cmd_handled()
         #self.__addr = addr
         print('i2c address of the device has changed to 0x%x.'%addr)
-        print('The device must be reset to use new address.')
+        print('The device MUST BE RESET.')
 
     """====================================================================
         슬레이브에 보낼 데이터 패킷을 구성한 후 __lst_args 리스트에 저장하는 함수들
-        패킷 구성: [__CMD_SEND_ARG, arg_index, data_type, data0, data1, ... ]    
+        패킷 구성: [ (__CMD_SEND_ARG,) arg_index, data_type, data0, data1, ... ]    
         실제로 보내는 것은 *함수를 실행하는 시점*에서 한다.
         이렇게 한 이유는 만약 함수를 실행하는 시점에서 오류가 발생한다면
         처음부터(즉, 인자를 보내는 것 부터) 다시 수행할 수 있도록 하기 위함이다.
@@ -114,8 +111,8 @@ class Ardpy:
         This method sets an input argument of the Arduino(using Ardpy lib) function.
         The type is one of followings:
             'int8'
-            'uint8' : This is the same as 'byte' (default value)
-            'int16' : This is the same as 'int'
+            'uint8' or 'byte' (default value)
+            'int16' or 'int'
             'uint16'
             'int32'
             'uint32'
@@ -184,26 +181,24 @@ class Ardpy:
         """
         if index >= self.__num_funcs:
             raise Exception('Index of func out of bound (dev:0x%x)'%self.__addr)
-
         retryCount = 0
         successExec = False
 
         while not successExec:
-            # transmit pre-stored function arguments
-            # and then, send func execution command
-            # wait until func finishied
+            # transmit all the pre-stored function arguments
+            # after that, send func execution command
+            # wait until func exec (slave) finishied
+            # and then, read return data
             self.__send_args() 
             self.__write_i2c_cmd(self.__CMD_EXEC_FUNC, [index]) 
             stat = self.__wait_until_cmd_handled() 
+            dtype, lst, info = self.__read_ret() # 리턴 데이터를 받는다
 
             # 함수 실행이 성공한 경우
             if stat == self.__STAT_CMD_COMPLETED: 
-                dtype, lst, info = self.__read_data() # 리턴 데이터를 받는다
                 self.__reset_args() # 모든 (함수)인자를 제거한다.
-
                 #struc.unpact()함수가 튜플을 반환하기 때문에
                 # 첫 번째 요소만 빼낸 다음 그것을 반환한다. (그래서 끝에 [0]이 붙은 것임)
-
                 if dtype == self.__DT_BYTE:
                     return ( self.__struct.unpack('B', bytes([lst[0]])) )[0]
                 elif dtype == self.__DT_SBYTE:
@@ -225,15 +220,14 @@ class Ardpy:
             else: 
                 retryCount +=1
                 if retryCount > self.__MAX_RETRY_CNT:
-
                     if stat == self.__STAT_ERR_NO_ARG: #5
-                        dtype, ret, info = self.__read_data()
+                        #dtype, ret, info = self.__read_data()
                         raise Exception('Missing arg %d for func %d. (dev:0x%x)'%(info,ret[0],self.__addr))
                     elif stat == self.__STAT_ERR_ARG_TYPE: #6
-                        dtype, ret, info = self.__read_data()
+                        #dtype, ret, info = self.__read_data()
                         raise Exception('Type of arg %d for func %d mismatch. (dev:0x%x)'%(info,ret[0],self.__addr))
                     else:
-                        dtype, ret, info = self.__read_data()
+                        #dtype, ret, info = self.__read_data()
                         #print('info:%d'%info)
                         raise Exception('Unknown error(%d) occurred.(dev:0x%x)'%(stat, self.__addr))
     
@@ -261,24 +255,19 @@ class Ardpy:
         self.__max_arg_num = info[4]
         self.__num_funcs = info[5]
         #18/Nov/2016 Ardpy의 버전을 받아오도록 했다.
-        #print('info[7]',info[7])
-        #self.__vera_firmware = info[6]
-        #self.__verb_firmware = int(info[7]/16)
-        #self.__verc_firmware = info[7]%16
-        #self.__str_ver_Ardpy = "%d.%d.%d"%(info[6],int(info[7]/16),info[7]%16)
+        #20/Nov/2016 firmware의 버젼도 받아오도록 했다.
         self.__ver_apy = (self.__struct.unpack('H', bytes(info[6:8])))[0]
         self.__ver_firmw = (self.__struct.unpack('H', bytes(info[8:10])))[0]
-        self.__str_ver_Ardpy = "%d.%d.%d"%(
-            int(self.__ver_apy/(2**12)),
-            int((self.__ver_apy%(2**12))/(2**6)),
-            int(self.__ver_apy%(2**12)%(2**6))
-        )
-        self.__str_ver_firmw = "%d.%d.%d"%(
-            int(self.__ver_firmw/(2**12)),
-            int((self.__ver_firmw%(2**12))/(2**6)),
-            int(self.__ver_firmw%(2**12)%(2**6))
-        )
+        self.__str_ver_Ardpy = "%d.%d.%d"%self.__decode_ver(self.__ver_apy)
+        self.__str_ver_firmw = "%d.%d.%d"%self.__decode_ver(self.__ver_firmw)
 
+    # slave에서 넘어온 16비트 버전번호를 a,b,c로 변환하는 함수
+    def __decode_ver(self, raw_num):
+        return (
+            int(raw_num/(2**12)),
+            int((raw_num%(2**12))/(2**6)),
+            int(raw_num%(2**12)%(2**6)),
+        )
     """====================================================================
         __lst_args 리스트에 저장한 인자를 하나씩 꺼내서 전송한다.
        ====================================================================
@@ -296,7 +285,7 @@ class Ardpy:
                     else:
                         retryCount += 1
                         if retryCount > self.__MAX_RETRY_CNT:
-                            type, ret, info = self.__read_data()
+                            #type, ret, info = self.__read_ret()
                             #print('cmd:%d'%info)
                             raise Exception('Unknown err(%d) in sending arg (dev:0x%x)'%(stat,self.__addr))
 
@@ -329,7 +318,7 @@ class Ardpy:
         함수의 실행 반환값을 아두이노에서 읽어오는 기능을 함.
        ====================================================================
     """
-    def __read_data(self):
+    def __read_ret(self):
         res = self.__read_i2c_data(cmd=self.__CMD_READ_DATA, length = self.__RET_DATA_LEN)
         return (res[self.__IDX_RET_TYPE],
                 res[self.__IDX_RET_DATA_STRT:(self.__IDX_RET_DATA_STRT+4)],

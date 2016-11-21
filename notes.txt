@@ -21,3 +21,9 @@ Ardpy.h version 1.1.2
     _VER(a,b,c) 매크로를 정의하여 버전에서 uint16_t 데이터를 계산
     Ardpy.h와 (user)firmware의 버전을 따로 전송하도록 _S_Id 구조를 변경(추가)
     Ardpy.check()함수의 세 번째 인수를 firmware 버전으로 설정 가능(default=1.0.0)
+    
+Ardpy.h version 1.1.0
+    Ardpy.check()를 loop() 함수 내에서 사용자가 호출하도록 수정
+        이유는 여기에서 사용자 등록 함수가 호출되는데 시간이 많이 걸릴 수 있으므로
+    ISR내에서 호출하기는 무리이기 때문이다.
+    ISR은 최대한 간단하게(수행를 빠르게 하기 위해서) 작성하는 것이 좋다는 기조를 유지해야 한다.
