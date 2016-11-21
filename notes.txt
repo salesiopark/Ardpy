@@ -9,7 +9,11 @@ ardpy.py version 1.1.5
         쓸데없는 재전송(master->slave)을 방지하기 위함이다.
         만약 체크썸도 이상이 없는데 원본과 다른 경우에만 원본을 다시 보낸다.
         이것으로 master<-slave 의 모든 경우에 checksum을 이용한다.
-    
+------------------------------------------------------------------------
+Ardpy.h version 1.1.4
+    <util/eeprom.h>대신 아두이노 라이브러리 "EEPROM.h"로 교체
+        이로서 AVR계열의 아두이노 뿐만 아니라 모든 기종으로 사용이 가능해질 것으로 기대함
+        
 Ardpy.h version 1.1.3
     __CMD_SEND_BACK의 경우에도 checksumd을 붙여서 전송하도록 수정
 

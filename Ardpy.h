@@ -46,8 +46,7 @@ class _HRP_ {
 
     private:
         enum _E_IN { // invariable numbers i.e. constants
-            //__RET_DATA_LENGTH__ = 7,
-            __EEPROM_ADDR__     = 1, // eeprom addr for storing i2c addr
+            __EEPROM_ADDR__     = 0, // eeprom addr for storing i2c addr
             __MIN_I2C_ADDR__    = 3,
             __MAX_I2C_ADDR__    = 119,
 		};

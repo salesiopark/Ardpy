@@ -1,13 +1,9 @@
 /***********************************************************************
 * (ardpy)Ledm device firmware
 ************************************************************************/
-#define __VER_LEDM_A 1
-#define __VER_LEDM_B 0
-#define __VER_LEDM_C 1
-//======================================================================
-//#include <Wire.h> // must be included befor Ardpy.h
 #include <Ardpy.h>
-
+#define VER __VER__(1,0,1)
+//---------------------------------------------------------------------
 #define X0 A0
 #define X1 A1
 #define X2 A2
@@ -96,13 +92,7 @@ void setup() {
     Ardpy.add_func(clear);// _exec_func(2)
     Ardpy.add_func(setall);// _exec_func(3)
 
-	Ardpy.begin(0x11, 101);
-    
-    /*
-    Serial.begin(115200);
-    Serial.println(_VER(1,1,1),HEX);
-    Serial.println(_VER(1,1,1),BIN);
-    */
+	Ardpy.begin(0x11, 101, VER);
 }
 
 byte col = 0;

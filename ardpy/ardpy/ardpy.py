@@ -1,6 +1,6 @@
 class Ardpy:
     # version
-    _VERSION = '1.1.6'
+    _VERSION = '1.1.7'
     
     # command constant to arduino
     __CMD_READ_DATA   = 0
@@ -90,13 +90,14 @@ class Ardpy:
     def addr(self, addr):
         if (addr < 3 or addr >119):
             raise Exception('i2c address is out of bound.')
-        ans = input('This will change the i2c addr of the device. proceed? [y/n]')
+        ans = input('This will change the i2c address of the device. proceed? [y/n]')
         if ans!='y': return
         #byte_list = [self.__CMD_CHANGE_ADDR, addr] 
         byte_list = [addr] 
         self.__write_i2c_cmd(self.__CMD_CHANGE_ADDR, byte_list)
         self.__wait_until_cmd_handled()
-        print('i2c address of the device has changed to 0x%x.'%self.addr)
+        #self.__addr = addr
+        print('i2c address of the device has changed to 0x%x.'%addr)
         print('The device must be reset to use new address.')
 
     """====================================================================

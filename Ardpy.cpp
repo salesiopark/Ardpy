@@ -4,17 +4,19 @@
 * by salesiopark(박장현, 국립목포대학교, 전기제어공학과)
 * <Wire.h> must be included before including <Ardpy.h> in user .ino file
 ************************************************************************/
+//#define __DEBUG__
+//----------------------------------------------------------------------------
 #define __VER_ARDPY__ __VER__(1,1,4)
 // includes ------------------------------------------------------------------
 #include "Ardpy.h"
-#include "Wire.h"
-#include <avr/eeprom.h>
+#include <Wire.h>
+//#inlcude <avr/eeprom.h>
+#include <EEPROM.h>
 // static memebers initialization --------------------------------------------
 _HRP_::_U_Id            _HRP_::_u_id = {0xffffffff, };
 volatile byte           _HRP_::_cmd = 0 ;
 volatile byte           _HRP_::_cmd_i2c = 0 ;
 volatile byte           _HRP_::_rcvBuf[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
-//volatile byte           _HRP_::__sbuf__[ __MAX_I2C_READ_BUF_LEN__ ] = {0,};
 byte                    _HRP_::_idx = 0;
 volatile _HRP_::_U_Ret  _HRP_::_u_ret = {{1,} };
 char                    _HRP_::_strBuf[ __STR_BUF_LENGTH__ ] = {0,};
@@ -97,7 +99,6 @@ byte _HRP_::begin(byte addr, uint32_t dev_id, uint16_t ver_firmw) {
 	_u_id.s_id.dev_id = dev_id;
 	_u_id.s_id.numArgs = _max_arg_num;
 	_u_id.s_id.numFuncs = _num_funcs;
-    //_u_id.s_id.verArdpy = __VER__(__V_APY_A__,__V_APY_B__,__V_APY_C__);
     _u_id.s_id.verArdpy = __VER_ARDPY__;
     _u_id.s_id.verFirmw = ver_firmw;
 	
@@ -110,27 +111,29 @@ byte _HRP_::begin(byte addr, uint32_t dev_id, uint16_t ver_firmw) {
         + _u_id.byArr[8] + _u_id.byArr[9]
     );
 
-	// if addr in EEPROM is valid, use that.
-	byte addr_real = addr;
-	byte addr_in_eeprom = eeprom_read_byte( (uint8_t *) __EEPROM_ADDR__ );
-	if ( __MIN_I2C_ADDR__ <= addr_in_eeprom && addr_in_eeprom <= __MAX_I2C_ADDR__ )
-		addr_real = addr_in_eeprom;
-
+	// 만약 EEPROM에 있는 I2C 주소가 유효하다면 그것으로 시작
+	//byte addr_in_eeprom = eeprom_read_byte( (uint8_t *) __EEPROM_ADDR__ );
+	byte addr_in_eeprom = EEPROM.read( __EEPROM_ADDR__ );
+	if ( __MIN_I2C_ADDR__ <= addr_in_eeprom && addr_in_eeprom <= __MAX_I2C_ADDR__ ) {
+		addr = addr_in_eeprom;
+    }
 	// malloc argArr and set all as NONE
-	_args = new _S_Arg [_max_arg_num];
+	_args = new _S_Arg[_max_arg_num];
 	_reset_all_args();
 
 	Wire.onReceive( _onReceive );
 	Wire.onRequest( _onRequest );
 
-	_stat = STAT_CMD_COMPLETED;
-	Wire.begin( addr_real );
+	Wire.begin( addr );
+	_stat = STAT_CMD_COMPLETED; //대기 상태로 돌입
     
     #ifdef __DEBUG__ //################################
         Serial.begin(115200); // for debugging
+        Serial.print("begin():addr in eeprom:");
+        Serial.println(addr_in_eeprom);
     #endif //##########################################
     
-	return addr_real;	
+	return addr;	
 }
 
 // user function adding : no num limit
@@ -238,8 +241,16 @@ void _HRP_:: check() {
     switch (_cmd) { 
 
         case _CMD_CHANGE_ADDR: // rcvBuf:[cmd, addr]
-            eeprom_update_byte( (uint8_t *)__EEPROM_ADDR__, _rcvBuf[1]); 					
-            //break;보다 아래와 같이 직접 하면 실행을 단축할 것 같다.
+            //eeprom_update_byte( (uint8_t *)__EEPROM_ADDR__, _rcvBuf[1]); 					
+            index = _rcvBuf[1]; // EEPROM.updat()시간이 오래 걸려서 미리 저장해 놓아야 한다.
+            EEPROM.update(__EEPROM_ADDR__, index);// it takes 3.3ms
+            #ifdef __DEBUG__ //#######################
+                Serial.print("desired addr:");
+                Serial.println( index );
+                index = EEPROM.read(__EEPROM_ADDR__);
+                Serial.print("addr changed as:");
+                Serial.println(index);
+            #endif //#################################
             _stat = STAT_CMD_COMPLETED;
             return;
 
