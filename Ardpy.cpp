@@ -6,7 +6,7 @@
 ************************************************************************/
 //#define __DEBUG__
 //----------------------------------------------------------------------------
-#define __VER_ARDPY__ __VER__(1,1,5)
+#define __VER_ARDPY__ __VER__(1,1,6)
 // includes ------------------------------------------------------------------
 #include "Ardpy.h"
 #include <Wire.h>
@@ -103,7 +103,7 @@ byte _HRP_::begin(byte addr, uint32_t dev_id, uint16_t ver_firmw) {
     _u_id.s_id.verFirmw = ver_firmw;
 	
     // 체크썸(_u_id.byArr[6])을 계산 
-    _u_id.s_id.checksum = 0xff - (byte)( _CMD_READ_ID
+    _u_id.s_id.checksum = 0xff - (byte)(
         + _u_id.byArr[0] + _u_id.byArr[1] + _u_id.byArr[2] + _u_id.byArr[3]
         + _u_id.byArr[4]
         + _u_id.byArr[5]
@@ -416,7 +416,7 @@ void _HRP_::_onRequest() {
             // _idx는 직전 데이터의 길이가 기록되어 있다.
             
             ///*
-            _checksum = _CMD_SEND_BACK;
+            _checksum = 0;
             for(byte k=0; k<_idx; k++) {
                 _checksum += _rcvBuf[k];
             }
@@ -433,9 +433,8 @@ void _HRP_::_onRequest() {
 
 		case _CMD_CHECK_OK:
 			_stat = _STAT_UNDER_NORMAL_PROC;//0
-			_statArr[0] = _stat;
-			//_statArr[1]=0xff-(_CMD_CHECK_OK+_stat);//255-(6+0)=249
-			_statArr[1]	= 249;
+			_statArr[0] = _stat; //0
+			_statArr[1]	= 0xff; // checksum
 			Wire.write( (const byte*)_statArr, 2);
             // 19Nov2016 ISR은 단순하게 유지해야 하으므로
             //  아래는 loop() 안에서 사용자가 추가하는 것으로 한다.
@@ -444,12 +443,12 @@ void _HRP_::_onRequest() {
 
 		case _CMD_READ_STAT:
 			_statArr[0] = _stat;
-			_statArr[1]	= 0xff - (_CMD_READ_STAT + _stat);//checksum
+			_statArr[1]	= 0xff - _stat;//checksum
 			Wire.write( (const byte*)_statArr, 2);
 			return;
 
 		case _CMD_READ_DATA:
-			_checksum = _CMD_READ_DATA;
+			_checksum = 0;
 			for(_idx=0; _idx < sizeof(_S_Ret) - 1; _idx++)
 				_checksum += _u_ret.byArr[_idx];
 			_u_ret.s_ret.checksum = 0xff - _checksum;

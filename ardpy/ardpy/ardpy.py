@@ -329,9 +329,17 @@ class Ardpy:
         cmd 까지 고려해서 체크섬을 계산한다.
        ====================================================================
     """
+    '''
     def __checksum(self, lst_bytes, cmd=0):#motorola checksum
         cnt = len(lst_bytes)+1
         total_sum = sum(lst_bytes) + cmd
+        lb_sum = total_sum.to_bytes(cnt, 'little')[0] #lowest byte
+        return 0xff - lb_sum
+    '''
+    #22/Nov/2016 checksum 계산에서 cmd를 제거한다.
+    def __checksum(self, lst_bytes):#motorola checksum
+        cnt = len(lst_bytes)
+        total_sum = sum(lst_bytes)
         lb_sum = total_sum.to_bytes(cnt, 'little')[0] #lowest byte
         return 0xff - lb_sum
 
@@ -405,7 +413,7 @@ class Ardpy:
             res = self.__raw_i2c_read(cmd, length)
             #res리스트의 마지막 요소(res[-1])가 slave에서 계산된 checksum
             # 계산된 체크섬과 일치하면 성공으로 간주
-            readSuccess = ( res[-1] == self.__checksum(res[:-1], cmd = cmd) )
+            readSuccess = ( res[-1] == self.__checksum(res[:-1]) )
             #print('rd_data (cmd:%d) << res:%s, csum:%s, cnt:%d'%(cmd, res, csum, tryCount))
             
             if self.__showErr and not readSuccess:
