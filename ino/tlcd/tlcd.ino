@@ -1,11 +1,8 @@
 /***********************************************************************
 * (ardpy)Tlcd firmware
 ************************************************************************/
-#define __VER_TLCD_A 0 // max 255
-#define __VER_TLCD_B 4 // max 15
-#define __VER_TLCD_C 0 // max 15
+#define VER __VER__(0,4,0)
 //======================================================================
-#include <Wire.h>
 #include <Ardpy.h>
 #include <LiquidCrystal.h>
 
@@ -43,12 +40,13 @@ void setup() {
 	Ardpy.add_func(noDisplay);// 3
 	Ardpy.add_func(setCursor);// 4
 
-	Ardpy.begin(0x11, 1);//0x04030201);
+	Ardpy.begin(0x11, 102, VER);
 	lcd.begin(16, 2);
 	lcd.clear();
-	lcd.print("ready42");
+	lcd.print("ready43");
 }
 
 
 void loop() {
+    Ardpy.check();
 }

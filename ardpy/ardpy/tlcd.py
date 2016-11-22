@@ -4,27 +4,34 @@ class Tlcd(Ardpy):
     '''
     Tlcd class for controlling (ardpy)Tlcd device.
     '''
-    _VERSION = '0.7.0'
+    _VERSION = '0.4.1'
 
-    def __init__(self, addr, port = 1):
-        super().__init__(addr, port = port)
+    def __init__(self, addr, port = 1, _showErr=False):
+        super().__init__(addr, port = port, _showErr = _showErr)
         self.clear()
-        self.display()
+        self.show()
 
     def clear(self):
         return self._exec_func(0)
 
-    def print(self, text):
-        self._set_str(text, type='str')
+    def puts(self, text):#putString
+        self._set_arg(text, type='str')
         return self._exec_func(1)
 
-    def display(self):
-        return self._exec_func(2)
-
-    def noDisplay(self):
-        return self._exec_func(3)
+    def show(self, ok=True):
+        if ok:
+            return self._exec_func(2)
+        else:
+            return self._exec_func(3)
 
     def setCursor(self, x, y):
-        self._send_byte(x)
-        self._send_byte(y, 1)
+        self._set_arg(x, type='byte')
+        self._set_arg(y, index=1, type='byte')
         return self._exec_func(4)
+
+    def _test(self):
+        cnt = 0;
+        while True:
+            self.setCursor(0,0)
+            self.puts(str(cnt))
+            cnt += 1
