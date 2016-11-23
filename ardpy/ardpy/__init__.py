@@ -28,7 +28,7 @@ for ver in subVers:
     verC += bc
     
 _VERSION = '%d.%d.%d'%(verA, verB, verC)
-print('ver ',_VERSION)
+print('ardpy ver',_VERSION)
 
 #불필요한 변수들은 삭제한다.
 del(subVers, readVer, readSubVer, verA, verB, verC, a, bc, ver)

@@ -1,6 +1,6 @@
 class Ardpy:
     # version
-    _VERSION = '1.1.8'
+    _VERSION = '1.1.9'
     
     # command constant to arduino
     __CMD_READ_DATA   = 0
@@ -47,10 +47,11 @@ class Ardpy:
     __RET_DATA_LEN	= 7
 
     # internal modules and functions =================================
-    import smbus as __smbus
     import struct as __struct
     import datetime as __datetime
-
+    from threading import Thread as __Thread
+    import time as __time
+    import smbus as __smbus
     """
     constructor
     """
@@ -63,6 +64,13 @@ class Ardpy:
         print('Ardpy device with address 0x%x and id:%d ready.'%(addr, self.__id))
         print('Number of functions:%d, max number of function args:%d '%(self.__num_funcs, self.__max_arg_num))
         print('Firmware ver. %s ("Ardpy.h" ver. %s)'%(self.__str_ver_firmw, self.__str_ver_Ardpy))
+        
+        self.__th = self.__Thread(target=self.poll)
+        self.__th.run()
+        
+    def poll(self):
+        print('polling test')
+        self.__time.sleep(2)
         
     @property
     def device_id(self):
