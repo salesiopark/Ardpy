@@ -6,7 +6,7 @@
 ************************************************************************/
 //#define __DEBUG__
 //----------------------------------------------------------------------------
-#define __VER_ARDPY__ __VER__(1,1,6)
+#define __VER_ARDPY__ __VER__(1,1,7)
 // includes ------------------------------------------------------------------
 #include "Ardpy.h"
 #include <Wire.h>
@@ -102,13 +102,13 @@ byte _HRP_::begin(byte addr, uint32_t dev_id, uint16_t ver_firmw) {
     _u_id.s_id.verArdpy = __VER_ARDPY__;
     _u_id.s_id.verFirmw = ver_firmw;
 	
-    // 체크썸(_u_id.byArr[6])을 계산 
+    // 체크썸(_u_id.byArr[8])을 계산 
     _u_id.s_id.checksum = 0xff - (byte)(
-        + _u_id.byArr[0] + _u_id.byArr[1] + _u_id.byArr[2] + _u_id.byArr[3]
-        + _u_id.byArr[4]
-        + _u_id.byArr[5]
-        + _u_id.byArr[6] + _u_id.byArr[7]
-        + _u_id.byArr[8] + _u_id.byArr[9]
+        + _u_id.byArr[0] + _u_id.byArr[1] // device id
+        + _u_id.byArr[2]
+        + _u_id.byArr[3]
+        + _u_id.byArr[4] + _u_id.byArr[5] // Ardpy ver
+        + _u_id.byArr[6] + _u_id.byArr[7] // user firmware ver
     );
 
 	// 만약 EEPROM에 있는 I2C 주소가 유효하다면 그것으로 시작

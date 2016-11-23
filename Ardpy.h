@@ -162,7 +162,7 @@ class _HRP_ {
         // use the info for check validity of number of args and functions
         // thus it needs no checking those in arduino code
         struct _S_Id {
-            uint32_t        dev_id; // device id
+            uint16_t        dev_id; // device id
             byte            numArgs; // maximnum arg num
             byte            numFuncs;// number of functions
             uint16_t        verArdpy;// version of Ardpy.h

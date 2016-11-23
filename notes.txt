@@ -1,3 +1,6 @@
+ardpy.py version 1.1.9
+    deviceId를 uint16_t 로 맞춰서 변경
+    
 ardpy.py version 1.1.6
     Ardpy.__wait_until_cmd_handled(self) 함수 개선(__read_stat()함수와 통함)
 
@@ -10,6 +13,10 @@ ardpy.py version 1.1.5
         만약 체크썸도 이상이 없는데 원본과 다른 경우에만 원본을 다시 보낸다.
         이것으로 master<-slave 의 모든 경우에 checksum을 이용한다.
 ------------------------------------------------------------------------
+Ardpy.h version 1.1.7
+    deviceId를 uint32_t 에서 uint16_t 으로 축소함
+        (최대 65,535면 너무 충분하다.)
+
 Ardpy.h version 1.1.6
     checksum을 계산할 때 _CMD까지 고려하는 것을 제거한다.
 

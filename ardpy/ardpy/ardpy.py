@@ -1,6 +1,6 @@
 class Ardpy:
     # version
-    _VERSION = '1.1.8'
+    _VERSION = '1.1.9'
     
     # command constant to arduino
     __CMD_READ_DATA   = 0
@@ -250,14 +250,14 @@ class Ardpy:
 
     def __read_id_info(self):
         """read id, max_arg_num and num_funcs from Ardpy device"""
-        info = self.__read_i2c_data(cmd=self.__CMD_READ_ID, length = 11)
-        self.__id = self.__struct.unpack('L', bytes(info[0:4]))[0]
-        self.__max_arg_num = info[4]
-        self.__num_funcs = info[5]
+        info = self.__read_i2c_data(cmd=self.__CMD_READ_ID, length = 9)
+        self.__id = self.__struct.unpack('H', bytes(info[0:2]))[0]
+        self.__max_arg_num = info[2]
+        self.__num_funcs = info[3]
         #18/Nov/2016 Ardpy의 버전을 받아오도록 했다.
         #20/Nov/2016 firmware의 버젼도 받아오도록 했다.
-        self.__ver_apy = (self.__struct.unpack('H', bytes(info[6:8])))[0]
-        self.__ver_firmw = (self.__struct.unpack('H', bytes(info[8:10])))[0]
+        self.__ver_apy = (self.__struct.unpack('H', bytes(info[4:6])))[0]
+        self.__ver_firmw = (self.__struct.unpack('H', bytes(info[6:8])))[0]
         self.__str_ver_Ardpy = "%d.%d.%d"%self.__decode_ver(self.__ver_apy)
         self.__str_ver_firmw = "%d.%d.%d"%self.__decode_ver(self.__ver_firmw)
 

@@ -32,4 +32,4 @@ print('ver ',_VERSION)
 
 #불필요한 변수들은 삭제한다.
 del(subVers, readVer, readSubVer, verA, verB, verC, a, bc, ver)
-del(ardpy, arduno, ledm, tlcd) # 맨 마지막에 와야한다(왜?)
+#del(ardpy, arduno, ledm, tlcd) # 맨 마지막에 와야한다(왜?)
