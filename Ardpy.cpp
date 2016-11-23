@@ -7,7 +7,7 @@
 // includes ------------------------------------------------------------------
 //#define __DEBUG__
 #include "Ardpy.h"
-#define __VER_ARDPY__ __VER__(1,1,7)
+#define __VER_ARDPY__ __VER__(1,1,8)
 #include <Wire.h>
 #include <EEPROM.h>
 // static memebers initialization --------------------------------------------

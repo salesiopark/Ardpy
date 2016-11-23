@@ -43,7 +43,7 @@ class _HRP_ {
             __EEPROM_ADDR__         = 0, // eeprom addr for storing i2c addr
             __MIN_I2C_ADDR__        = 3,
             __MAX_I2C_ADDR__        = 119,
-            __INIT_MAX_ARG_NUM__    = 4,
+            __INIT_MAX_ARG_NUM__    = 3,
             __STR_BUF_LEN__	        = 31,
             __I2C_READ_BUF_LEN__    = 32
 		};
