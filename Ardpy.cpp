@@ -42,49 +42,49 @@ void _HRP_::set_max_arg_num(byte num) {
 // set_ret() function overloading definitions -----------------------------------------
 
 void _HRP_::set_ret(uint8_t byVal) {
-	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
+	if (_stat == STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_UINT8;
 		_u_ret.s_ret.dat.ucVal = byVal;
 	}
 }	
 
 void _HRP_::set_ret(int8_t sbVal) {
-	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
+	if (_stat == STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_INT8;
 		_u_ret.s_ret.dat.sbVal = sbVal;
 	}
 }	
 
 void _HRP_::set_ret(int16_t sVal) {
-	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
+	if (_stat == STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_INT16;
 		_u_ret.s_ret.dat.u_s.val = sVal;
 	}
 }	
 
 void _HRP_::set_ret(uint16_t usVal) {
-	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
+	if (_stat == STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_UINT16;
 		_u_ret.s_ret.dat.u_us.val = usVal;
 	}
 }	
 
 void _HRP_::set_ret(int32_t lVal) {
-	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
+	if (_stat == STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_INT32;
 		_u_ret.s_ret.dat.u_l.val = lVal;
 	}
 }	
 
 void _HRP_::set_ret(uint32_t ulVal) {
-	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
+	if (_stat == STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_UINT32;
 		_u_ret.s_ret.dat.u_ul.val = ulVal;
 	}
 }	
 
 void _HRP_::set_ret(float fVal) {
-	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
+	if (_stat == STAT_UNDER_NORMAL_PROC ) {  //if no error occurred
 		_u_ret.s_ret.type = _DTYPE_FLOAT;
 		_u_ret.s_ret.dat.u_f.val = fVal;
 	}
@@ -157,7 +157,7 @@ void _HRP_::add_func( void (*func)(void) ){
 // stat에 에러 코드를 저장한다.
 
 void _HRP_::_check_if_no_err_to_get_arg(byte index, byte dtype) {
-	if (_stat == _STAT_UNDER_NORMAL_PROC ) {  //if currently no error occurred
+	if (_stat == STAT_UNDER_NORMAL_PROC ) {  //if currently no error occurred
 		if ( _args[index].type == _DTYPE_NONE) { // if there is no arg received
 			_u_ret.s_ret.info = index;
 			_stat = STAT_ERR_NO_ARG;
@@ -231,7 +231,7 @@ void _HRP_:: _reset_all_args() {
 // 모든 명령을 처리한 후 정상/에러발생 여부를 저장한다.
 void _HRP_:: check() {
     // 만약 이 함수를 loop() 안에서 실행한다면 아래를 추가해야 한다.
-    if (_stat != _STAT_UNDER_NORMAL_PROC ) return;
+    if (_stat != STAT_UNDER_NORMAL_PROC ) return;
     
     byte index; // 이것 대신 _idx를 사용하면 안됨
     _cmd = _rcvBuf[0]; //ISR에서 사용되는 변수가 아님
@@ -258,7 +258,7 @@ void _HRP_:: check() {
 				_funcArr[index](); //<= 이 안에서 오류가 발생할 수 있다.
                                    // 왜냐면 인자를 check하는 루틴을 거치므로
 				_reset_all_args(); // 모든 인자를 NONE으로 리셋한다.
-				if (_stat == _STAT_UNDER_NORMAL_PROC ) {					
+				if (_stat == STAT_UNDER_NORMAL_PROC ) {					
 					_stat = STAT_CMD_COMPLETED;
 				} else { // some error in input args occurs
                     //_stat = STAT_ERR_NO_ARG 혹은 STAT_ERR_ARG_TYPE
@@ -328,7 +328,7 @@ void _HRP_:: check() {
 
 					default:
                         _u_ret.s_ret.info = index;
-						_stat = _STAT_ERR_DATA_101;
+						_stat = STAT_ERR_DATA_101;
 						return;
 						//break;
 
@@ -340,7 +340,7 @@ void _HRP_:: check() {
 
         default:
 				_u_ret.s_ret.info = _cmd;
-				_stat = _STAT_ERR_DATA_102;
+				_stat = STAT_ERR_DATA_102;
 				return;
 				//break;
 	} // switch (_cmd)
@@ -430,7 +430,7 @@ void _HRP_::_onRequest() {
             return;
 
 		case _CMD_CHECK_OK:
-			_stat = _STAT_UNDER_NORMAL_PROC;//0
+			_stat = STAT_UNDER_NORMAL_PROC;//0
 			_statArr[0] = _stat; //0
 			_statArr[1]	= 0xff; // checksum
 			Wire.write( (const byte*)_statArr, 2);
@@ -445,7 +445,7 @@ void _HRP_::_onRequest() {
 			Wire.write( (const byte*)_statArr, 2);
 			return;
 
-		case _CMD_READ_DATA:
+		case _CMD_READ_RET:
 			_checksum = 0;
 			for(_idx=0; _idx < sizeof(_S_Ret) - 1; _idx++)
 				_checksum += _u_ret.byArr[_idx];

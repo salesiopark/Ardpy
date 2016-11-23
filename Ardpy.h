@@ -63,19 +63,19 @@ class _HRP_ {
 		};
 
         enum _E_STATUS {
-            _STAT_UNDER_NORMAL_PROC = 0,
+            STAT_UNDER_NORMAL_PROC = 0,
             STAT_CMD_COMPLETED      = 1,
-            _STAT_ERR_DATA_RCVD     = 2, // wrong data received
+            STAT_ERR_DATA_RCVD     = 2, // wrong data received
             STAT_ERR_NO_ARG         = 5,
             STAT_ERR_ARG_TYPE       = 6,
 
-            _STAT_ERR_DATA_100      = 100, // wrong data received
-            _STAT_ERR_DATA_101      = 101, // wrong data received
-            _STAT_ERR_DATA_102      = 102, // wrong data received
+            STAT_ERR_DATA_100      = 100, // wrong data received
+            STAT_ERR_DATA_101      = 101, // wrong data received
+            STAT_ERR_DATA_102      = 102, // wrong data received
 		};
 
         enum _E_COMMAND {
-            _CMD_READ_DATA      = 0,
+            _CMD_READ_RET       = 0,
             _CMD_READ_ID        = 1, //<- //#define CMD_IS_READY					2
             _CMD_CHANGE_ADDR    = 2,
             _CMD_SEND_ARG       = 3,
@@ -144,17 +144,16 @@ class _HRP_ {
 		};
 
 		// data structures for the return data to the master ---------
-		struct _S_Ret {
-			volatile byte			type;
-			volatile _U_Data		dat;
-			volatile byte 			info;
-			volatile byte			checksum;
-		};
+        struct _S_Ret {
+            volatile byte       type;
+            volatile _U_Data    dat;
+            volatile byte       info;
+            volatile byte       checksum;
+        };
 
         union _U_Ret {
-            volatile _S_Ret         s_ret;
-            //volatile byte           byArr [ __RET_DATA_LENGTH__ ];
-            volatile byte           byArr [ sizeof(_S_Ret) ];
+            volatile _S_Ret     s_ret;
+            volatile byte       byArr [ sizeof(_S_Ret) ];
 		};
 
 		// data structure for the device id (ulong) -------------------
@@ -178,7 +177,7 @@ class _HRP_ {
         static void             _onRequest();
         static void             _onReceive(int);
         static void             _reset_all_args();
-		static void _check_if_no_err_to_get_arg(byte, byte);
+		static void             _check_if_no_err_to_get_arg(byte, byte);
 
         volatile static byte    _stat;
         volatile static byte    _statArr[2];
