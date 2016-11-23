@@ -4,13 +4,11 @@
 * by salesiopark(박장현, 국립목포대학교, 전기제어공학과)
 * <Wire.h> must be included before including <Ardpy.h> in user .ino file
 ************************************************************************/
-//#define __DEBUG__
-//----------------------------------------------------------------------------
-#define __VER_ARDPY__ __VER__(1,1,7)
 // includes ------------------------------------------------------------------
+//#define __DEBUG__
 #include "Ardpy.h"
+#define __VER_ARDPY__ __VER__(1,1,7)
 #include <Wire.h>
-//#inlcude <avr/eeprom.h>
 #include <EEPROM.h>
 // static memebers initialization --------------------------------------------
 _HRP_::_U_Id            _HRP_::_u_id = {0xffffffff, };
@@ -469,4 +467,4 @@ void _HRP_::_onRequest() {
 	} 
 }
 
-_HRP_   Ardpy;//외부에서 사용할 객체를 생성한다.
+_HRP_ Ardpy;//외부에서 사용할 객체를 생성한다.
