@@ -1,6 +1,6 @@
 class Ardpy:
     # version
-    _VERSION = '1.1.9'
+    _VERSION = '1.1.0'
     
     # command constant to arduino
     __CMD_READ_DATA   = 0

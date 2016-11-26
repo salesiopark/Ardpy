@@ -14,22 +14,20 @@ subVers = [
 #calculate ardpy package version
 def readVer(strVer):
     lst = strVer.split('.')
-    return ( int(lst[0]),int(lst[1]),int(lst[2]) )
+    return int(lst[0]), int(lst[1]), int(lst[2])
 
 def readSubVer(strVer):
     lst = strVer.split('.')
-    return ( int(lst[0]), int(lst[1])*10+int(lst[2]) )
+    return int(lst[0])*100+int(lst[1])*10+int(lst[2])
 
 verA, verB, verC = readVer(Ardpy._VERSION)
-
+verR = 0
 for ver in subVers:
-    a, bc = readSubVer(ver)
-    verB += a
-    verC += bc
+    verR += readSubVer(ver)
 
-_VERSION = '%d.%d.%d'%(verA, verB, verC)
-print('ver ',_VERSION)
+_VERSION = '%d.%d.%d(R%d)'%(verA, verB, verC, verR)
+#print('ver ',_VERSION)
 
 #불필요한 변수들은 삭제한다.
-del(subVers, readVer, readSubVer, verA, verB, verC, a, bc, ver)
+del(subVers, readVer, readSubVer, verA, verB, verC, verR, ver)
 del(ardpy, arduno, ledm, tlcd) # 맨 마지막에 와야한다(왜?)
