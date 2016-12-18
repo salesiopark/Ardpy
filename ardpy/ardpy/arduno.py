@@ -46,3 +46,13 @@ class Arduno(Ardpy):
         self._set_arg(pin) # 1st argument
         self._set_arg(val, index = 1) # 2nd argument
         return self._exec_func(4) # call awrite() function
+
+    def _test(self, delay=0.2):
+        import time
+        self.pinMode(13, self.OUTPUT)
+        while True:
+            self.digitalWrite(13, self.HIGH)
+            time.sleep(delay)
+            self.digitalWrite(13, self.LOW)
+            time.sleep(delay)            
+        
