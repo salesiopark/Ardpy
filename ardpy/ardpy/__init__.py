@@ -1,12 +1,12 @@
 from .ardpy import Ardpy
-from .arduno import Arduno # device id : 0
+from .arduno import ArdUno # device id : 0
 from .ledm import Ledm # device id : 101
 from .tlcd import Tlcd # device id : 102
 
 # 모듈이 추가되면 아래 리스트에 추가한다.
 # 각 클래스는 _VERSION 문자열에 버전을 a.b.c 형식으로 명기해야 한다.
 subVers = [
-    Arduno._VERSION,
+    ArdUno._VERSION,
     Ledm._VERSION,
     Tlcd._VERSION,
 ]

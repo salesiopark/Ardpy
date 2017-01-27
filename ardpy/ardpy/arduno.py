@@ -1,6 +1,6 @@
 from . import Ardpy
 
-class Arduno(Ardpy):
+class ArdUno(Ardpy):
     '''
     Arduno class for controlling Arduno device.
     The Arduno device is composed of Arduino nano and I2C sockets.
@@ -54,5 +54,8 @@ class Arduno(Ardpy):
             self.digitalWrite(13, self.HIGH)
             time.sleep(delay)
             self.digitalWrite(13, self.LOW)
-            time.sleep(delay)            
+            time.sleep(delay)
+    
+    def attatchInterrupt(self, pin, ISR, mode):
+        pass
         
